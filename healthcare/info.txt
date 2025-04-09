@@ -1,0 +1,5 @@
+this project is about creating an web app for hospital.
+I am going to record the patient i and out time and also the patient's name and room number.
+I am going to use python and flask for this project,and
+i am going to link the medical and hospital to know the drugs availability,and 
+Doctor sends the patient medicine details directly to the medical, so the patient gets the medicine from the medical via their id.
