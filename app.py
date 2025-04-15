@@ -25,7 +25,7 @@ class Patient(db.Model):
 
 class Patientin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), primary_key=True , nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     check_in_time = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.String(255))
 
