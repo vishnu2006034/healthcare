@@ -104,21 +104,6 @@ def search():
 
     return render_template('adminpage.html',result=result,patients=patients)
 
-
-
-
-# #@app.route('/checkin/<int:patient_id>',methods = ['POST'])
-# def check_in_patient(patient_id):
-#     patient = Patient.query.get(patient_id)
-#     if not patient:
-#         return jsonify({"message": "Patient not found"}), 404
-#     else:
-#         record = check_in_patient(patient_id=patient_id,notes=request.json.get('notes',''))
-#         db.session.add(record)
-#         db.session.commit()
-#         return jsonify({"message": f"Patient {patient.name} checked in successfully"}), 200
-#    #return render_template()
-
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_page():
     if request.method == 'POST':
@@ -129,15 +114,13 @@ def checkin_page():
         if not patient1:
             flash("Patient not found!", "error")
             return redirect(url_for('checkin_page'))
-
         record = patientin(patient_id=patient_id, notes=notes1)
         db.session.add(record)
         db.session.commit()
         flash(f"Patient {Patient.name} checked in.", "success")
-        #return redirect(url_for('checkin_page'))
-    patients=patientin.query.all()
-    patient1=Patient.query.all()
-    return render_template('checkin.html',patients=patients,patient1=patient1)
+        return redirect(url_for('checkin_page'))
+    shift2 = db.session.query(Patientin, Patient).join(Patient).all()
+    return render_template('checkin.html',patients=shift2)
 
 if __name__ == '__main__':
     with app .app_context():
