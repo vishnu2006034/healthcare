@@ -92,7 +92,10 @@ def checkin_page():
             if not patient1:
                 flash("Patient not found!", "error")
                 return redirect(url_for('checkin_page'))
-
+            existing_checkin = Patientin.query.filter_by(patient_id=patient_id).first()
+            if existing_checkin:
+                flash(f"Patient {patient1.name} is already checked in.", "error")
+                return redirect(url_for('checkin_page'))
             record = Patientin(patient_id=patient_id, notes=notes1)
             db.session.add(record)
             db.session.commit()
