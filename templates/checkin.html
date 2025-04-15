@@ -8,44 +8,43 @@
     <h1>Check-In Patient</h1>
     <form action="/checkin" method="POST">
         <label for="patient_id">Patient ID:</label><br>
-        <!-- <input type="number" name="patient_id" id="patient_id" required><br><br> -->
-        <select id="patient_id" name="patient_id required>
+        <input type="number" name="patient_id" id="patient_id" required><br><br>
+        <!-- <select id="patient_id" name="patient_id required>
             {% for patient in patients %}
                 <option value="{{patient.patient_id }}">{{patient.name}} (ID:{{patient.patient_id}})</option>
             {% endfor %}
-        </select><br><br>
+        </select><br><br> -->
         <label for="notes">Notes (optional):</label><br>
         <textarea name="notes" id="notes"></textarea><br><br>
 
         <input type="submit" value="Check In">
     </form>
     <div class="results">
-        <h2 class="subtitle">Results:</h2>
-        <table class="table is-striped">
+        <h2>Checked-In Patients</h2>
+        <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Patient ID</th>
-                    <th>Checkin Time</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Department</th>
+                    <th>Check-In Time</th>
                     <th>Notes</th>
                 </tr>
             </thead>
             <tbody>
-                {% if patients %}
-                    {% for book in patients %}
-                    <tr>
-                        <td>{{ book.id }}</td>
-                        <td>{{ book.patient_id}}</td>
-                        <td>{{ book.check_in_time }}</td>
-                        <td>{{ book.notes}}</td>
-                        
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="3">No results found.</td>
-                    </tr>
-                {% endif %}
+                {% for checkin_record, patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ patient.gender }}</td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.department }}</td>
+                    <td>{{ checkin_record.check_in_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ checkin_record.notes }}</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
