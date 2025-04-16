@@ -29,6 +29,12 @@ class Patientin(db.Model):
     check_in_time = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.String(255))
 
+class Patientout(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patientid = db.Column(db.Integer, db.ForeignKey('patient.id'),nullable=False)
+    check_out_time = db.Column(db.DateTime, default=datetime.utcnow)
+    notes = db.Column(db.String(255))
+
 @app.route('/')
 def index():
     return render_template("login.html")
@@ -109,6 +115,26 @@ def checkin_page():
         print("ERROR in checkin_page:", str(e))
         flash("An error occurred while processing your request", "error")
         return redirect(url_for('index'))
+
+@app.route('/checkout' , methods=['GET' , 'POST'])
+def checkout_page():
+    if request.method == 'POST':
+        patientid = request.form.get('patientid')
+        notes= request.form.get('notes','')
+        patientin = Patientin.query.get(patientid)
+        if not patientin:
+            flash("Patient not found!", "error")
+            return redirect(url_for('checkout_page'))
+        checkout = Patientout( patientid = patientin.patient_id,check_out_time = patientin.check_in_time , notes= patientin.notes)
+        db.session.add(checkout)
+        db.session.delete(patientin)
+        db.session.commit()
+
+    checkout1 = db.session.query(Patientout,Patient).join(Patient).all()
+    return render_template('checkout.html', patients=checkout1 )
+
+    
+
 
 
 if __name__ == '__main__':

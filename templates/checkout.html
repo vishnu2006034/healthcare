@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Check-Out</title>
+</head>
+<body>
+    <h1>Check-Out Patient</h1>
+    <form action="/checkout" method="POST">
+        <label for="patient_id">Patient ID:</label><br>
+        <input type="number" name="patientid" id="patientid" required><br><br>
+        <!-- <select id="patient_id" name="patient_id required>
+            {% for patient in patients %}
+                <option value="{{patient.patient_id }}">{{patient.name}} (ID:{{patient.patient_id}})</option>
+            {% endfor %}
+        </select><br><br> -->
+        <label for="notes">Notes (optional):</label><br>
+        <textarea name="notes" id="notes"></textarea><br><br>
+
+        <input type="submit" value="Check Out">
+    </form>
+    <div class="results">
+        <h2>Checked-Out Patients</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Department</th>
+                    <th>Check-Out Time</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checkin_record, patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ patient.gender }}</td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.department }}</td>
+                    <td>{{ checkin_record.check_out_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ checkin_record.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
