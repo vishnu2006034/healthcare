@@ -35,6 +35,18 @@ class Patientout(db.Model):
     check_out_time = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.String(255))
 
+class Medical(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    password = db.Column(db.String(15))
+
+class Drugs(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(100), nullable = False)
+    price = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+
 @app.route('/')
 def index():
     return render_template("login.html")
@@ -55,6 +67,8 @@ def adminl():
             flash('check the password ')
             return redirect(url_for('index'))
     return render_template('adminlogin.html')
+
+
 
 @app.route('/adminp')
 def adminp():
@@ -133,7 +147,38 @@ def checkout_page():
     checkout1 = db.session.query(Patientout,Patient).join(Patient).all()
     return render_template('checkout.html', patients=checkout1 )
 
-    
+@app.route('/medl' , methods=['GET','POST'])
+def medl():
+    if request.method == 'POST':
+        code="123"
+        hpassword = Medical(password=code)
+        db.session.add(hpassword)
+        db.session.commit()
+        password = request.form.get('password')
+        passes = Medical.query.filter_by(password=code).first()
+        if password == passes.password:
+            flash('successfully login')
+            return redirect('medp')
+        else:
+            flash('check the password ')
+            return redirect(url_for('index'))
+    return render_template('medlogin.html')
+
+@app.route('/drugsreg',methods=['GET','POST'])
+def drugsreg():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        department = request.form.get('department')
+        price = request.form.get('price')
+        quantity = request.form.get('quantity')
+        newdrug= Drugs(name=name, department=department,price=price,quantity=quantity)
+        db.session.add(newdrug)
+        db.session.commit()
+        flash("the drugs has been added")
+        return redirect(url_for('medp'))
+    else:
+        flash("the durgs is already there")
+    return render_template('drugreg.html')
 
 
 

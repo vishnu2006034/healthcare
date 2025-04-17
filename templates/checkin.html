@@ -6,9 +6,9 @@
 </head>
 <body>
     <h1>Check-In Patient</h1>
-    <form action="/checkin" method="POST">
+    <form action="/checkin" method="POST" autocomplete="off">
         <label for="patient_id">Patient ID:</label><br>
-        <input type="number" name="patient_id" id="patient_id" required><br><br>
+        <input type="number" name="patient_id" id="patient_id" required autocomplete="off"><br><br>
         <!-- <select id="patient_id" name="patient_id required>
             {% for patient in patients %}
                 <option value="{{patient.patient_id }}">{{patient.name}} (ID:{{patient.patient_id}})</option>
