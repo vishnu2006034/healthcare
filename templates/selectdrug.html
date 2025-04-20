@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Search Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<style>
+    .frame .text {
+        position: absolute;
+        width: 526px;
+        height: 48px;
+        top: 174px;
+        left: 0;
+    }
+
+    .frame .check {
+        position: absolute;
+        width: 116px;
+        height: 18px;
+        top: 0;
+        left: 0;
+    }
+
+.frame .text-wrapper-4 {
+    position: right;
+    width: 100%;
+    top: 0;
+    left: 10px;
+    align-items: center;
+    font-family: var(--regular-13px-font-family);
+    font-weight: var(--regular-13px-font-weight);
+    color: black;
+    font-size: var(--regular-13px-font-size);
+    letter-spacing : var(--regular-13px-letter-spacing);
+    line-height: var(--regular-13px-line-height);
+    white-space: nowrap;
+    font-style: var(--regular-13px-font-style);
+}
+.btn-signup {
+    width: 100%;
+    height:100%;
+    display: inline-block;
+    padding: 10px 20px;
+    background-color:var(--blue-600); /* Same background color as login */
+    color: rgb(197, 32, 32);
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px; /* Rounded corners */
+    margin-top: 10px;
+    align-items: center;
+}
+
+.btn-signup:hover {
+    background-color: #76899c; /* Darker shade on hover */
+}
+</style>
+<form method="POST">
+    <div class="form-group">
+        <label for="drug">Select a Drug to Update:</label>
+        <select id="drug" name="drug_id" required>
+            {% for drug in drugs %}
+                <option value="{{ drug.id }}">{{ drug.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Update</button>
+</form>
+<div class="text">
+    <div class="check">
+        <div class="text-wrapper-4">
+        <a href="{{url_for('drugsreg')}}" class="button is-link">New Drug Registration</a>
+    </div>
+</div>

@@ -41,10 +41,10 @@ class Medical(db.Model):
 
 class Drugs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     department = db.Column(db.String(100), nullable = False)
-    price = db.Column(db.Integer, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=True)
 
 
 @app.route('/')
@@ -164,6 +164,10 @@ def medl():
             return redirect(url_for('index'))
     return render_template('medlogin.html')
 
+@app.route('/medp')
+def medp():
+    return render_template('medpage.html')
+
 @app.route('/drugsreg',methods=['GET','POST'])
 def drugsreg():
     if request.method == 'POST':
@@ -180,7 +184,23 @@ def drugsreg():
         flash("the durgs is already there")
     return render_template('drugreg.html')
 
+@app.route('/selectdrug', methods=['GET', 'POST'])
+def selectdrug():
+    drugs = Drugs.query.all()
 
+    if request.method == 'POST':
+        selected_id = request.form['drug_id']
+        return redirect(url_for('updrugs', drug_id=selected_id))
+
+    return render_template('selectdrug.html', drugs=drugs)
+@app.route('/updrugs/<int:drug_id>',methods = ['GET','POST'])
+def updrugs(drug_id):
+    drug=Drugs.query.get(drug_id)
+    if request.method == 'POST':
+        drug.price=float(request.form['price'])
+        drug.quantity=int(request.form['quantity'])
+        db.session.commit()
+    return render_template('updrug.html', drug=drug)
 
 if __name__ == '__main__':
     with app.app_context():
