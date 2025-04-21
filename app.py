@@ -72,7 +72,7 @@ def adminl():
 
 @app.route('/adminp')
 def adminp():
-    return render_template('adminpage.html')
+    return render_template('adminmain.html')
 
 @app.route('/patreg', methods=["GET", "POST"])
 def patreg():
@@ -92,15 +92,34 @@ def patreg():
         flash("check for the account already exists")
     return render_template("patreg.html")
 
+
+
 @app.route('/search')
 def search():
-    q = request.args.get("q")
-    patients = Patient.query.all()
+    q = request.args.get("q", "")
+    query = Patient.query
+
     if q:
-        result = Patient.query.filter(Patient.name.ilike(f'%{q}%') | Patient.address.ilike(f'%{q}%')).order_by(Patient.department.asc()).all()
-    else:
-        result = Patient.query.all()
-    return render_template('adminpage.html', result=result, patients=patients)
+        query = query.filter(
+            Patient.name.ilike(f"%{q}%") | Patient.address.ilike(f"%{q}%"  )
+        )
+    result = query.order_by(Patient.id.asc()).all()
+
+    data = []
+    for patient in result:
+        data.append({
+            "id":patient.id,
+            "name": patient.name,
+            "age":patient.age,
+            "address": patient.address,
+            "department": patient.department,
+            "gender": patient.gender,
+            "phone": patient.phone
+            # add more fields as needed
+        })
+
+    return jsonify(data)
+
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_page():
