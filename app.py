@@ -2,13 +2,30 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+import logger
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
+
+
+
+def is_active(self):
+        return True
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret_key'
+login = LoginManager(app)
+login.login_view = 'doclogin'
 
 db = SQLAlchemy(app)
+
+@login.user_loader
+def load_user(user_id):
+    try:
+        return Doctor.query.get(int(user_id))
+    except Exception as e:
+        logger.error(e)
+        return None
+
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +38,16 @@ class Patient(db.Model):
     age = db.Column(db.Integer, nullable=False)
     phone = db.Column(db.Integer, nullable=False)
     address = db.Column(db.String, nullable=False)
+    department = db.Column(db.String, nullable=False)
+
+class Doctor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String, nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    phone = db.Column(db.Integer, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
 
 class Patientin(db.Model):
@@ -92,8 +119,48 @@ def patreg():
         flash("check for the account already exists")
     return render_template("patreg.html")
 
+@app.route('/docreg', methods=["GET", "POST"])
+def docreg():
+    if current_user.is_authenticated:  # if the employee password is correct open the employee profile
+        return redirect(url_for('docpro'))
+    if request.method == "POST":  # to get information for employee
+        name = request.form.get('name')
+        email = request.form.get('email')
+        department = request.form.get('dep')
+        phone = request.form.get('phone')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        password = request.form.get('password')
+        
+        newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password)
+        db.session.add(newdoc)
+        db.session.commit()
+        flash("account is successfully created", "success")
+        return redirect(url_for('doclogin')) # after the registraion returns to login page
+    else:
+        flash("check for the account already exists")
+    return render_template("docreg.html")  # it is the registration html
+    
+@app.route('/doclogin', methods=["GET", "POST"])
+def doclogin():
+    if current_user.is_authenticated:  # checks the email and password
+        return redirect(url_for('docpro'))
+    if request.method == "POST":
+        email = request.form.get('email')
+        password = request.form.get('password')
+        doc = Doctor.query.filter_by(email=email).first()
+        if doc and doc.password == password:  # if the email and pass match show the profile
+            login_user(doc)
+            return redirect(url_for('docpro'))
+        else:
+            flash("login details is wrong", "error")
+    return render_template("doclogin.html")
 
-
+@app.route("/docpro")
+# @login_required
+def docpro ():
+    # doc = Doctor.query.get(current_user.id) 
+    return render_template("docpage.html")
 @app.route('/search')
 def search():
     q = request.args.get("q", "")
