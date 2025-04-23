@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required,UserMixin
 import logger
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
@@ -40,7 +40,7 @@ class Patient(db.Model):
     address = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
 
-class Doctor(db.Model):
+class Doctor(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String, nullable=False)
@@ -73,6 +73,12 @@ class Drugs(db.Model):
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=True)
 
+class Prescription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    prescription_text = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @app.route('/')
 def index():
@@ -156,11 +162,29 @@ def doclogin():
             flash("login details is wrong", "error")
     return render_template("doclogin.html")
 
+
 @app.route("/docpro")
-# @login_required
+@login_required
 def docpro ():
+    patients = db.session.query(Patientin, Patient).join(Patient, Patientin.patient_id == Patient.id).filter(Patient.department == current_user.department).all()
+
     # doc = Doctor.query.get(current_user.id) 
-    return render_template("docpage.html")
+    return render_template("docpage.html",patients=patients)
+
+@app.route('/add_prescription', methods=['POST'])
+@login_required
+def add_prescription():
+    patient_id = request.form.get('patient_id')
+    prescription_text = request.form.get('prescription_text')
+    if not patient_id or not prescription_text:
+        flash('Please provide all required fields', 'error')
+        return redirect(url_for('docpro'))
+    prescription = Prescription(patient_id=patient_id, doctor_id=current_user.id, prescription_text=prescription_text)
+    db.session.add(prescription)
+    db.session.commit()
+    flash('Prescription added successfully', 'success')
+    return redirect(url_for('docpro'))
+
 @app.route('/search')
 def search():
     q = request.args.get("q", "")
@@ -287,6 +311,12 @@ def updrugs(drug_id):
         drug.quantity=int(request.form['quantity'])
         db.session.commit()
     return render_template('updrug.html', drug=drug)
+
+@app.route("/logout")
+def logout():
+    logout_user()  # log out user
+    return redirect(url_for('doclogin'))
+    
 
 if __name__ == '__main__':
     with app.app_context():
