@@ -88,7 +88,7 @@
                     <div class="text-wrapper-4">
                     <a href="{{url_for('checkout_page')}}" class="button is-link">checkout</a>
                 </div>
-            </div>
+            </div> -->
             <div class="results">
                 <h2 class="subtitle">Results:</h2>
                 <table class="table is-striped">
@@ -96,37 +96,33 @@
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Age</th>
-                            <th>Address</th>
-                            <th>Phone</th>
-                            <th>gender</th>
-                            <th>Department</th>
+                            <th>Doctor name</th>
+                            <th>prescription</th>
+                            <th>date</th>
+                            <!-- <th>gender</th>
+                            <th>Department</th> -->
                         </tr>
                     </thead>
                     <tbody>
-                        {% if result%}
-                            {% for book in result %}
+                        
+                            {% for patient,prescription,doctor in press %}
                             <tr>
-                                <td>{{ book.id }}</td>
-                                <td>{{ book.name }}</td>
-                                <td>{{ book.age }}</td>
-                                <td>{{ book.address }}</td>
-                                <td>{{ book.phone }}</td>
-                                <td>{{ book.gender }}</td>
-                                <td>{{ book.department }}</td>
+                                <td>{{ patient.id }}</td>
+                                <td>{{ patient.name }}</td>
+                                <td>{{ doctor.name }}</td>
+                                <td>{{ prescription.prescription_text }}</td>
+                                <td>{{ prescription.date }}</td>
+                                
                             </tr>
                             {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="3">No results found.</td>
-                            </tr>
-                        {% endif %}
+                        
+                            
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
-     -->
+    
 
 </body>
 </html>

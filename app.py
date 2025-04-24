@@ -276,7 +276,9 @@ def medl():
 
 @app.route('/medp')
 def medp():
-    return render_template('medpage.html')
+    #press = db.session.query(Prescription,Patient,Doctor).join(Patient,Prescription.patient_id==Patient.id).join(Doctor,Prescription.doctor_id==Doctor.id).all()
+    press = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).all()
+    return render_template('medpage.html',press=press)
 
 @app.route('/drugsreg',methods=['GET','POST'])
 def drugsreg():
