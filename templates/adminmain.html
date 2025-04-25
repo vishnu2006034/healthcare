@@ -51,22 +51,29 @@
                         <th>Address</th>
                         <th>Phone</th>
                         <th>Gender</th>
-                        <th>Department</th>
-                    </tr>
-                </thead>
-                <tbody id="resultsBody">
-                    {% for book in result %}
-                    <tr>
-                        <td>{{ book.id }}</td>
-                        <td>{{ book.name }}</td>
-                        <td>{{ book.age }}</td>
-                        <td>{{ book.address }}</td>
-                        <td>{{ book.phone }}</td>
-                        <td>{{ book.gender }}</td>
-                        <td>{{ book.department }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+                {% for book in result %}
+                <tr>
+                    <td>{{ book.id }}</td>
+                    <td>{{ book.name }}</td>
+                    <td>{{ book.age }}</td>
+                    <td>{{ book.address }}</td>
+                    <td>{{ book.phone }}</td>
+                    <td>{{ book.gender }}</td>
+                    <td>{{ book.department }}</td>
+                    <td>
+                        <form action="{{ url_for('checkin_page') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="patient_id" value="{{ book.id }}">
+                            <button type="submit" class="btn btn-primary btn-sm">Check In</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
             </table>
         </div>
     </div>
@@ -86,17 +93,23 @@
                             resultsBody.innerHTML = "<tr><td colspan='7'>No results found.</td></tr>";
                         } else {
                             data.forEach(book => {
-                                const row = `
-                                    <tr>
-                                        <td>${book.id}</td>
-                                        <td>${book.name}</td>
-                                        <td>${book.age}</td>
-                                        <td>${book.address}</td>
-                                        <td>${book.phone}</td>
-                                        <td>${book.gender}</td>
-                                        <td>${book.department}</td>
-                                    </tr>
-                                `;
+                            const row = `
+                                <tr>
+                                    <td>${book.id}</td>
+                                    <td>${book.name}</td>
+                                    <td>${book.age}</td>
+                                    <td>${book.address}</td>
+                                    <td>${book.phone}</td>
+                                    <td>${book.gender}</td>
+                                    <td>${book.department}</td>
+                                    <td>
+                                        <form action="/checkin" method="POST" style="display:inline;">
+                                            <input type="hidden" name="patient_id" value="${book.id}">
+                                            <button type="submit" class="btn btn-primary btn-sm">Check In</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            `;
                                 resultsBody.innerHTML += row;
                             });
                         }

@@ -188,25 +188,26 @@ def add_prescription():
 @app.route('/search')
 def search():
     q = request.args.get("q", "")
-    query = Patient.query
+    query = db.session.query(Patientin, Patient).join(Patient, Patientin.patient_id == Patient.id)
 
     if q:
         query = query.filter(
-            Patient.name.ilike(f"%{q}%") | Patient.address.ilike(f"%{q}%"  )
+            Patient.name.ilike(f"%{q}%") | Patient.department.ilike(f"%{q}%")
         )
     result = query.order_by(Patient.id.asc()).all()
 
     data = []
-    for patient in result:
+    for checkin_record, patient in result:
         data.append({
-            "id":patient.id,
+            "id": patient.id,
             "name": patient.name,
-            "age":patient.age,
+            "age": patient.age,
             "address": patient.address,
             "department": patient.department,
             "gender": patient.gender,
-            "phone": patient.phone
-            # add more fields as needed
+            "phone": patient.phone,
+            "check_in_time": checkin_record.check_in_time.strftime('%Y-%m-%d %H:%M') if checkin_record.check_in_time else "",
+            "notes": checkin_record.notes or ""
         })
 
     return jsonify(data)
