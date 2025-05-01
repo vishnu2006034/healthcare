@@ -32,6 +32,7 @@
                     <th>Department</th>
                     <th>Check-In Time</th>
                     <th>Notes</th>
+                    <th>Check Out</th>
                 </tr>
             </thead>
             <tbody id="resultsBody">
@@ -42,8 +43,13 @@
                     <td>{{ patient.gender }}</td>
                     <td>{{ patient.age }}</td>
                     <td>{{ patient.department }}</td>
-                    <td>{{ checkin_record.check_in_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ checkin_record.notes }}</td>
+                    <td>{{ checkin_record.check_in_time }}</td>
+                    <td>{{ checkin_record.notes or 'N/A' }}</td>
+                    <td> <form action="{{ url_for('checkout_page') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="patientid" value="{{ patient.id }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Check Out</button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
                 
@@ -53,7 +59,7 @@
     </div>
 </div>
 <!-- Live search script disabled due to data limitations -->
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById("searchInput");
         const resultsBody = document.getElementById("resultsBody");
@@ -98,4 +104,4 @@
 </script>
 
 </body>
-</html>
+</html> -->

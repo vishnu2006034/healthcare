@@ -188,16 +188,16 @@ def add_prescription():
 @app.route('/search')
 def search():
     q = request.args.get("q", "")
-    query = db.session.query(Patientin, Patient).join(Patient, Patientin.patient_id == Patient.id)
+    query = Patient.query
 
     if q:
         query = query.filter(
             Patient.name.ilike(f"%{q}%") | Patient.department.ilike(f"%{q}%")
         )
     result = query.order_by(Patient.id.asc()).all()
-
+    
     data = []
-    for checkin_record, patient in result:
+    for patient in result:
         data.append({
             "id": patient.id,
             "name": patient.name,
@@ -206,8 +206,8 @@ def search():
             "department": patient.department,
             "gender": patient.gender,
             "phone": patient.phone,
-            "check_in_time": checkin_record.check_in_time.strftime('%Y-%m-%d %H:%M') if checkin_record.check_in_time else "",
-            "notes": checkin_record.notes or ""
+            # "check_in_time": checkin_record.check_in_time.strftime('%Y-%m-%d %H:%M') if checkin_record.check_in_time else "",
+            # "notes": checkin_record.notes or ""
         })
 
     return jsonify(data)
@@ -233,7 +233,7 @@ def checkin_page():
             flash(f"Patient {patient1.name} checked in.", "success")
             return redirect(url_for('checkin_page'))
 
-        shift2 = db.session.query(Patientin, Patient).join(Patient).all()
+        shift2 = db.session.query(Patientin, Patient).join(Patient,Patientin.patient_id==Patient.id).all()
         return render_template('checkin.html', patients=shift2)
 
     except Exception as e:
@@ -241,23 +241,31 @@ def checkin_page():
         flash("An error occurred while processing your request", "error")
         return redirect(url_for('index'))
 
-@app.route('/checkout' , methods=['GET' , 'POST'])
+@app.route('/checkout', methods=['GET', 'POST'])
 def checkout_page():
     if request.method == 'POST':
-        patientid = request.form.get('patientid')
-        notes= request.form.get('notes','')
-        patientin = Patientin.query.get(patientid)
-        if not patientin:
-            flash("Patient not found!", "error")
-            return redirect(url_for('checkout_page'))
-        checkout = Patientout( patientid = patientin.patient_id,check_out_time = patientin.check_in_time , notes= patientin.notes)
-        db.session.add(checkout)
-        db.session.delete(patientin)
-        db.session.commit()
+        try:
+            patientid = request.form.get('patientid')
+            notes1 = request.form.get('notes', '')
+            patient1 = Patient.query.get(patientid)
+            if not patient1:
+                flash("Patient not found!", "error")
+                return redirect(url_for('checkout_page'))
+            record = Patientout(patientid=patientid, notes=notes1)
+            db.session.add(record)
+            # Delete the patient from Patientin table after checkout
+            patientin_record = Patientin.query.filter_by(patient_id=patientid).first()
+            if patientin_record:
+                db.session.delete(patientin_record)
+            db.session.commit()
+            flash(f"Patient {patient1.name} checked out.", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error during checkout: {str(e)}", "error")
+        return redirect(url_for('checkout_page'))
 
-    checkout1 = db.session.query(Patientout,Patient).join(Patient).all()
-    return render_template('checkout.html', patients=checkout1 )
-
+    shift2 = db.session.query(Patientout, Patient).join(Patient, Patientout.patientid == Patient.id).all()
+    return render_template('checkout.html', patients=shift2)
 @app.route('/medl' , methods=['GET','POST'])
 def medl():
     if request.method == 'POST':
