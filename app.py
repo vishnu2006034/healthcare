@@ -266,6 +266,7 @@ def checkout_page():
 
     shift2 = db.session.query(Patientout, Patient).join(Patient, Patientout.patientid == Patient.id).all()
     return render_template('checkout.html', patients=shift2)
+
 @app.route('/medl' , methods=['GET','POST'])
 def medl():
     if request.method == 'POST':
@@ -300,7 +301,7 @@ def drugsreg():
         db.session.add(newdrug)
         db.session.commit()
         flash("the drugs has been added")
-        return redirect(url_for('medp'))
+        return redirect(url_for('selectdrug'))
     else:
         flash("the durgs is already there")
     return render_template('drugreg.html')
@@ -308,12 +309,20 @@ def drugsreg():
 @app.route('/selectdrug', methods=['GET', 'POST'])
 def selectdrug():
     drugs = Drugs.query.all()
-
     if request.method == 'POST':
-        selected_id = request.form['drug_id']
-        return redirect(url_for('updrugs', drug_id=selected_id))
+        for drug in drugs:
+            key = f'quantity_{drug.id}'
+            if key in request.form:
+                new_quantity = int(request.form[key])
+                drug.quantity = new_quantity
+        db.session.commit()
+        return redirect(url_for('selectdrug'))
 
-    return render_template('selectdrug.html', drugs=drugs)
+    # if request.method == 'POST':
+    #     selected_id = request.form['drug_id']
+    #     return redirect(url_for('updrugs', drug_id=selected_id))
+    drug1=Drugs.query.all()
+    return render_template('selectdrug.html', drugs=drug1)
 @app.route('/updrugs/<int:drug_id>',methods = ['GET','POST'])
 def updrugs(drug_id):
     drug=Drugs.query.get(drug_id)

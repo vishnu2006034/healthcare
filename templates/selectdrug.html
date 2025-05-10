@@ -2,74 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Search Page</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <title>Drugs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
-<style>
-    .frame .text {
-        position: absolute;
-        width: 526px;
-        height: 48px;
-        top: 174px;
-        left: 0;
-    }
-
-    .frame .check {
-        position: absolute;
-        width: 116px;
-        height: 18px;
-        top: 0;
-        left: 0;
-    }
-
-.frame .text-wrapper-4 {
-    position: right;
-    width: 100%;
-    top: 0;
-    left: 10px;
-    align-items: center;
-    font-family: var(--regular-13px-font-family);
-    font-weight: var(--regular-13px-font-weight);
-    color: black;
-    font-size: var(--regular-13px-font-size);
-    letter-spacing : var(--regular-13px-letter-spacing);
-    line-height: var(--regular-13px-line-height);
-    white-space: nowrap;
-    font-style: var(--regular-13px-font-style);
-}
-.btn-signup {
-    width: 100%;
-    height:100%;
-    display: inline-block;
-    padding: 10px 20px;
-    background-color:var(--blue-600); /* Same background color as login */
-    color: rgb(197, 32, 32);
-    text-align: center;
-    text-decoration: none;
-    border-radius: 5px; /* Rounded corners */
-    margin-top: 10px;
-    align-items: center;
-}
-
-.btn-signup:hover {
-    background-color: #76899c; /* Darker shade on hover */
-}
-</style>
-<form method="POST">
-    <div class="form-group">
-        <label for="drug">Select a Drug to Update:</label>
-        <select id="drug" name="drug_id" required>
-            {% for drug in drugs %}
-                <option value="{{ drug.id }}">{{ drug.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <button type="submit">Update</button>
-</form>
-<div class="text">
-    <div class="check">
-        <div class="text-wrapper-4">
-        <a href="{{url_for('drugsreg')}}" class="button is-link">New Drug Registration</a>
+<body>
+    <h1>Check-In Patient</h1>
+    
+    
+    <div class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Patients List</h2>
+            <div class="w-50">
+                <label class="form-label">Search for a Patient</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Enter patient name or address">
+                <a href="{{url_for('drugsreg')}}">new drug</a>
+            </div>
+        </div>
+        <form method="post">
+        <table class="table table-bordered align-middle shadow-sm">
+            <thead class="table-light">
+                
+                <tr>
+                    <th>Drug ID</th>
+                    <th>Drug Name</th>
+                    <th>Department</th>
+                    <th>Drug price</th>
+                    <th>Drug quantity</th>
+                    <!-- <th>Check-In Time</th>
+                    <th>Notes</th> -->
+                    <th>update</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+                {% for drug in drugs %}
+                <tr>
+                    <td>{{ drug.id }}</td>
+                    <td>{{ drug.name }}</td>
+                    <td>{{ drug.department }}</td>
+                    <td>{{ drug.price }}</td>
+                    <td>{{ drug.quantity }}</td>
+                    <td>
+                        <input type="number" name="quantity_{{ drug.id }}" value="{{ drug.quantity }}" min="0">
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <br>
+                <button type="submit">Update All</button>
+            </form>
+        </tbody>
+        </table>
     </div>
 </div>
+<!-- Live search script disabled due to data limitations -->
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById("searchInput");
+        const resultsBody = document.getElementById("resultsBody");
+
+        function fetchResults(query = "") {
+            fetch(`/search?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    resultsBody.innerHTML = "";
+                    if (data.length === 0) {
+                        resultsBody.innerHTML = "<tr><td colspan='7'>No results found.</td></tr>";
+                    } else {
+                        data.forEach(book => {
+                            const row = `
+                                <tr>
+                                    <td>${book.id}</td>
+                                    <td>${book.name}</td>
+                                    <td>${book.gender}</td>
+                                    <td>${book.age}</td>
+                                    <td>${book.department}</td>
+                                    <td>${book.check_in_time}</td>
+                                    <td>${book.notes}</td>
+                                </tr>
+                            `;
+                            resultsBody.innerHTML += row;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    resultsBody.innerHTML = "<tr><td colspan='7'>Error loading data.</td></tr>";
+                });
+        }
+
+        input.addEventListener("input", function () {
+            fetchResults(this.value);
+        });
+
+        // Load all data on initial page load
+        fetchResults();
+    });
+</script>
+
+</body>
+</html> -->
