@@ -45,7 +45,7 @@
                     <td>{{ drug.price }}</td>
                     <td>{{ drug.quantity }}</td>
                     <td>
-                        <input type="number" name="quantity_{{ drug.id }}" value="{{ drug.quantity }}" min="0">
+                        <input type="text" name="quantity_{{ drug.id }}" placeholder="e.g. +2 or -1 or 5">
                     </td>
                 </tr>
                 {% endfor %}

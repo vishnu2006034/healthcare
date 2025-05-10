@@ -312,9 +312,21 @@ def selectdrug():
     if request.method == 'POST':
         for drug in drugs:
             key = f'quantity_{drug.id}'
-            if key in request.form:
-                new_quantity = int(request.form[key])
-                drug.quantity = new_quantity
+            input_value = request.form.get(key, '').strip()
+            if input_value:
+                try:
+                    if input_value.startswith('+'):
+                        change=int(input_value[1:])
+                        drug.quantity+=change
+                    elif input_value.startswith('-'):
+                        change = int(input_value[1:])
+                        drug.quantity -= change
+                    else:
+                        drug.quantity = int(input_value)
+                except:
+                    flash('invalid input')
+                # new_quantity = int(request.form[key])
+                # drug.quantity = new_quantity
         db.session.commit()
         return redirect(url_for('selectdrug'))
 
