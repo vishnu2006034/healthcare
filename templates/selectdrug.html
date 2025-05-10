@@ -18,7 +18,7 @@
             <div class="w-50">
                 <label class="form-label">Search for a Patient</label>
                 <input type="text" id="searchInput" class="form-control" placeholder="Enter patient name or address">
-                <a href="{{url_for('drugsreg')}}">new drug</a>
+                
             </div>
         </div>
         <form method="post">
@@ -52,7 +52,7 @@
                 
                 <br>
                 <button type="submit">Update All</button>
-            </form>
+                <button><a href="{{url_for('drugsreg')}}">new drug</a></button>
         </tbody>
         </table>
     </div>
