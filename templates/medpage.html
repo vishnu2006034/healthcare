@@ -33,74 +33,39 @@
             transform: translateY(0);
         }
     </style>
-    
-    
 </head>
 
 <body>
-
-    <!-- <section class="section">
-        <div class="container">
-            <h1 class="title">Patient Search</h1>
-            <form action="/search" method="get">
-                <div class="field">
-                    <label class="label">Search for a Patient</label>
-                    <div class="control">
-                        <input type="text" class="input" name="q" placeholder="Enter patient name or address" hx-get="/search" hx-trigger="keyup changed delay:500ms">
-                    </div>
-                </div>
-                <div class="control">
-                    <button type="submit" class="button is-link">Search</button>
-                </div>
-            </form> -->
-
-            
-            
-            <div class="button-container">
-                <a href="{{ url_for('selectdrug') }}" class="custom-button">Drug</a>
-            </div>
-            
-            <!-- <div class="text">
-                <div class="check">
-                    <div class="text-wrapper-4">
-                    <a href="{{url_for('checkout_page')}}" class="button is-link">checkout</a>
-                </div>
-            </div> -->
-            <div class="container-fluid p-4">
-                <table class="table table-bordered align-middle shadow-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Doctor name</th>
-                            <th>Department</th>
-                            <th>prescription</th>
-                            <th>date</th>
-                            <!-- <th>gender</th>
-                            <th>Department</th> -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                            {% for prescription,patient,doctor in press %}
-                            <tr>
-                                <td>{{ patient.id }}</td>
-                                <td>{{ patient.name }}</td>
-                                <td>{{ doctor.name }}</td>
-                                <td>{{doctor.department}}</td>
-                                <td>{{ prescription.prescription_text }}</td>
-                                <td>{{ prescription.date }}</td>
-                                
-                            </tr>
-                            {% endfor %}
-                        
-                            
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-    
-
+    <div class="button-container">
+        <a href="{{ url_for('selectdrug') }}" class="custom-button">Drug</a>
+    </div>
+    <div class="container-fluid p-4">
+        <table class="table table-bordered align-middle shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Doctor name</th>
+                    <th>Department</th>
+                    <th>prescription</th>
+                    <th>date</th>
+                    <th>Drugs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription,patient,doctor in press %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ doctor.name }}</td>
+                    <td>{{doctor.department}}</td>
+                    <td>{{ prescription.prescription_text }}</td>
+                    <td>{{ prescription.date }}</td>
+                    <td><a href="{{ url_for('selectdrug', patient_id=patient.id) }}">drug</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

@@ -7,7 +7,6 @@ import logger
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
 
-
 def is_active(self):
         return True
 
@@ -80,6 +79,12 @@ class Prescription(db.Model):
     prescription_text = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+class DrugsHistory(db.Model):
+    id= db.Column(db.Integer, primary_key=True)
+    patient_id= db.Column(db.Integer , db.ForeignKey('patient.id'),nullable =False)
+    drugs_id = db.Column(db.Integer, db.ForeignKey('drugs.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 @app.route('/')
 def index():
     return render_template("login.html")
@@ -100,8 +105,6 @@ def adminl():
             flash('check the password ')
             return redirect(url_for('index'))
     return render_template('adminlogin.html')
-
-
 
 @app.route('/adminp')
 def adminp():
@@ -308,6 +311,7 @@ def drugsreg():
 
 @app.route('/selectdrug', methods=['GET', 'POST'])
 def selectdrug():
+    patient_id = request.args.get('patient_id')
     drugs = Drugs.query.all()
     if request.method == 'POST':
         for drug in drugs:
@@ -325,24 +329,43 @@ def selectdrug():
                         drug.quantity = int(input_value)
                 except:
                     flash('invalid input')
-                # new_quantity = int(request.form[key])
-                # drug.quantity = new_quantity
         db.session.commit()
         return redirect(url_for('selectdrug'))
-
-    # if request.method == 'POST':
-    #     selected_id = request.form['drug_id']
-    #     return redirect(url_for('updrugs', drug_id=selected_id))
     drug1=Drugs.query.all()
-    return render_template('selectdrug.html', drugs=drug1)
-@app.route('/updrugs/<int:drug_id>',methods = ['GET','POST'])
-def updrugs(drug_id):
-    drug=Drugs.query.get(drug_id)
-    if request.method == 'POST':
-        drug.price=float(request.form['price'])
-        drug.quantity=int(request.form['quantity'])
+    patient=Patient.query.all()
+
+    return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id)
+
+from flask_login import login_required, current_user
+
+@app.route('/add_drugs_history', methods=['POST'])
+@login_required
+def add_drugs_history():
+    patient_id = request.form.get('patient_id')
+    selected_drugs = request.form.getlist('selected_drugs')
+    print(f"Received patient_id: {patient_id}")
+    print(f"Received selected_drugs: {selected_drugs}")
+    if not patient_id:
+        flash('Please select a patient.', 'error')
+        return redirect(url_for('selectdrug'))
+    if not selected_drugs:
+        flash('Please select at least one drug.', 'error')
+        return redirect(url_for('selectdrug'))
+    try:
+        # Add entries to DrugsHistory for each selected drug
+        for drug_id in selected_drugs:
+            drug_history = DrugsHistory(patient_id=patient_id, drugs_id=int(drug_id))
+            db.session.add(drug_history)
+            print(f"Added DrugsHistory for drug_id: {drug_id}")
+
         db.session.commit()
-    return render_template('updrug.html', drug=drug)
+        flash('Selected drugs added to history successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        print(f"Exception occurred: {str(e)}")
+        flash(f'Error adding drugs to history: {str(e)}', 'error')
+    return redirect(url_for('selectdrug'))
+
 
 @app.route("/logout")
 def logout():
