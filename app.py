@@ -311,60 +311,76 @@ def drugsreg():
 
 @app.route('/selectdrug', methods=['GET', 'POST'])
 def selectdrug():
-    patient_id = request.args.get('patient_id')
-    drugs = Drugs.query.all()
     if request.method == 'POST':
+        patient_id = request.form.get('patient_id')
+        if not patient_id:
+            flash('Patient ID is required to select drugs.', 'error')
+            return redirect(url_for('medp'))
+        drugs = Drugs.query.all()
         for drug in drugs:
             key = f'quantity_{drug.id}'
             input_value = request.form.get(key, '').strip()
             if input_value:
                 try:
                     if input_value.startswith('+'):
-                        change=int(input_value[1:])
-                        drug.quantity+=change
+                        change = int(input_value[1:])
+                        drug.quantity += change
                     elif input_value.startswith('-'):
                         change = int(input_value[1:])
                         drug.quantity -= change
                     else:
                         drug.quantity = int(input_value)
                 except:
-                    flash('invalid input')
+                    flash('Invalid input for drug quantity.')
+        selected_drugs = request.form.getlist('selected_drugs')
+        if not selected_drugs:
+            flash('Please select at least one drug.', 'error')
+            return redirect(url_for('selectdrug', patient_id=patient_id))
+        try:
+            for drug_id in selected_drugs:
+                drug_history = DrugsHistory(patient_id=patient_id, drugs_id=int(drug_id))
+                db.session.add(drug_history)
+            db.session.commit()
+            flash('Selected drugs added to history successfully.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding drugs to history: {str(e)}', 'error')
+        return redirect(url_for('selectdrug', patient_id=patient_id))
+    else:
+        patient_id = request.args.get('patient_id')
+        if not patient_id:
+            flash('Patient ID is required to select drugs.', 'error')
+            return redirect(url_for('medp'))
+        drug1 = Drugs.query.all()
+        patient = Patient.query.all()
+        return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id)
+
+@app.route('/updatedrugs', methods=['GET', 'POST'])
+def updatedrugs():
+    if request.method == 'POST':
+        drugs = Drugs.query.all()
+        for drug in drugs:
+            key = f'quantity_{drug.id}'
+            input_value = request.form.get(key, '').strip()
+            if input_value:
+                try:
+                    if input_value.startswith('+'):
+                        change = int(input_value[1:])
+                        drug.quantity += change
+                    elif input_value.startswith('-'):
+                        change = int(input_value[1:])
+                        drug.quantity -= change
+                    else:
+                        drug.quantity = int(input_value)
+                except:
+                    flash('Invalid input for drug quantity.')
         db.session.commit()
-        return redirect(url_for('selectdrug'))
-    drug1=Drugs.query.all()
-    patient=Patient.query.all()
+        flash('Drug quantities updated successfully.', 'success')
+        return redirect(url_for('updatedrugs'))
+    else:
+        drug1 = Drugs.query.all()
+        return render_template('updatedrugs.html', drugs=drug1)
 
-    return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id)
-
-from flask_login import login_required, current_user
-
-@app.route('/add_drugs_history', methods=['POST'])
-@login_required
-def add_drugs_history():
-    patient_id = request.form.get('patient_id')
-    selected_drugs = request.form.getlist('selected_drugs')
-    print(f"Received patient_id: {patient_id}")
-    print(f"Received selected_drugs: {selected_drugs}")
-    if not patient_id:
-        flash('Please select a patient.', 'error')
-        return redirect(url_for('selectdrug'))
-    if not selected_drugs:
-        flash('Please select at least one drug.', 'error')
-        return redirect(url_for('selectdrug'))
-    try:
-        # Add entries to DrugsHistory for each selected drug
-        for drug_id in selected_drugs:
-            drug_history = DrugsHistory(patient_id=patient_id, drugs_id=int(drug_id))
-            db.session.add(drug_history)
-            print(f"Added DrugsHistory for drug_id: {drug_id}")
-
-        db.session.commit()
-        flash('Selected drugs added to history successfully.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        print(f"Exception occurred: {str(e)}")
-        flash(f'Error adding drugs to history: {str(e)}', 'error')
-    return redirect(url_for('selectdrug'))
 
 
 @app.route("/logout")

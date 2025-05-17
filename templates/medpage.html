@@ -36,9 +36,12 @@
 </head>
 
 <body>
+    <!-- Removed the Drug button as it requires patient_id to function properly -->
+    
     <div class="button-container">
-        <a href="{{ url_for('selectdrug') }}" class="custom-button">Drug</a>
+        <a href="{{ url_for('updatedrugs') }}" class="custom-button">Drug</a>
     </div>
+   
     <div class="container-fluid p-4">
         <table class="table table-bordered align-middle shadow-sm">
             <thead class="table-light">
