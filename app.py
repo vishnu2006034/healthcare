@@ -381,7 +381,10 @@ def updatedrugs():
         drug1 = Drugs.query.all()
         return render_template('updatedrugs.html', drugs=drug1)
 
-
+@app.route('/drughistory')
+def drughistory():
+    drug = db.session.query(DrugsHistory,Patient,Drugs).join(Patient,DrugsHistory.patient_id==Patient.id).join(Drugs,DrugsHistory.drugs_id==Drugs.id).all()
+    return render_template("drughistory" ,drugs=drug)
 
 @app.route("/logout")
 def logout():

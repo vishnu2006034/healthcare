@@ -12,53 +12,82 @@
 
 </head>
 <body>
-    <h1>Checkedin Patients</h1>
-    
-    
-    <div class="container-fluid p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Patients List</h2>
-            <div class="w-50">
-                <label class="form-label">Search for a Patient</label>
-                <input type="text" id="searchInput" class="form-control" placeholder="Enter patient name or address">
-            </div>
-        </div>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar bg-dark text-white p-3 vh-100">
+            <!-- <h1>Checkedin Patients</h1> -->
+            <h5 class="mb-4">Menu</h5>
 
-        <table class="table table-bordered align-middle shadow-sm">
-            <thead class="table-light">
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2"><i class="fas fa-users me-2"></i> All Patients</li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('checkin_page') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> Check In
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('checkout_page') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> Check Out
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('patreg') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> New Patient
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('logout') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> LOGOUT 
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="container-fluid p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <!-- <h2>Patients List</h2> -->
+                <div class="w-50">
+                    <label class="form-label">Search for a Patient</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Enter patient name or address">
+                </div>
+            </div>
+
+            
+            <div class="container-fluid p-4">
+                <table class="table table-bordered align-middle shadow-sm">
+                    <thead class="table-light">
+                        
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Check-in Time</th>
+                                <th>Notes</th>
+                                <th>Prescription</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patientin, patient in patients %}
+                            <tr>
+                                <td>{{ patient.id }}</td>
+                                <td>{{ patient.name }}</td>
+                                <td>{{ patient.age }}</td>
+                                <td>{{ patient.gender }}</td>
+                                <td>{{ patientin.check_in_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ patientin.notes }}</td>
+                                <td>
+                                    <form action="{{ url_for('add_prescription') }}" method="POST">
+                                        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                                        <textarea name="prescription_text" rows="2" cols="20" placeholder="Enter prescription"></textarea><br>
+                                        <button type="submit">Add</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                </table></div>
                 
-                <thead>
-                    <tr>
-                        <th>Patient ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Check-in Time</th>
-                        <th>Notes</th>
-                        <th>Prescription</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for patientin, patient in patients %}
-                    <tr>
-                        <td>{{ patient.id }}</td>
-                        <td>{{ patient.name }}</td>
-                        <td>{{ patient.age }}</td>
-                        <td>{{ patient.gender }}</td>
-                        <td>{{ patientin.check_in_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                        <td>{{ patientin.notes }}</td>
-                        <td>
-                            <form action="{{ url_for('add_prescription') }}" method="POST">
-                                <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                                <textarea name="prescription_text" rows="2" cols="20" placeholder="Enter prescription"></textarea><br>
-                                <button type="submit">Add</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <li><a href="{{url_for('logout')}}">Logout</a></li>
     </div>
 </div>
 
