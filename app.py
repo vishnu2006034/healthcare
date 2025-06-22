@@ -389,7 +389,7 @@ def drughistory():
 @app.route("/logout")
 def logout():
     logout_user()  # log out user
-    return redirect(url_for('doclogin'))
+    return redirect(url_for('index'))
     
 
 if __name__ == '__main__':

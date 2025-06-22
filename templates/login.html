@@ -1,87 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login</title>
     <style>
+        :root {
+            --primary-color: #007BFF;
+            --white-color: #ffffff;
+            --button-bg: #ffffff;
+            --button-text: #007BFF;
+            --button-hover-bg: #0056b3;
+            --button-hover-text: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --card-shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background:  #007BFF;
+            background: var(--primary-color);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-family: sans-serif;
-            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--white-color);
+            overflow: hidden;
         }
 
         .bubbles {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
+            overflow: hidden;
         }
 
         .bubble {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            animation: bubble-animation 5s linear infinite;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            animation: bubble-animation linear infinite;
         }
 
         @keyframes bubble-animation {
             0% {
-                transform: translate(0, 0) scale(1);
+                transform: translateY(0) scale(1);
                 opacity: 1;
             }
             50% {
-                transform: translate(0, -50px) scale(1.2);
                 opacity: 0.7;
             }
             100% {
-                transform: translate(0, -100px) scale(1.5);
+                transform: translateY(-120px) scale(1.5);
                 opacity: 0;
             }
         }
 
         .container {
+            position: relative;
+            z-index: 1;
+            background: var(--white-color);
+            padding: 3rem 4rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px var(--card-shadow);
             text-align: center;
+            max-width: 360px;
+            width: 90%;
+            backdrop-filter: none;
+            color: var(--primary-color);
         }
+
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        p {
-            font-size: 2rem;
+            font-size: 2.8rem;
             margin-bottom: 2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--primary-color);
         }
+
         button {
-            background-color: white;
-            color:  var(--basewhite);
-            a{text-decoration: none;}
-            size: 18px;
-            padding: 1rem 2rem;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            font-size: 1.1rem;
+            padding: 0.75rem 2rem;
             border: none;
-            border-radius: 5px;
-            margin: 0.5rem;
+            border-radius: 30px;
+            margin: 0.5rem 0;
+            width: 100%;
             cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        button:hover,
+        button:focus {
+            background-color: var(--button-hover-bg);
+            color: var(--button-hover-text);
+            outline: none;
+            box-shadow: 0 6px 12px rgba(0, 86, 179, 0.6);
+        }
+
+        button a {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 2rem 2.5rem;
+                max-width: 320px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            button {
+                font-size: 1rem;
+                padding: 0.65rem 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Sign in to your Account</h1>
-        <button><a href="{{url_for('adminl')}}">login as admin</a></button>
-        <button><a href="{{url_for('medl')}}">login as medical</a></button>
-        <button><a href="{{url_for('doclogin')}}">login as Doctor</a></button>
+        <button><a href="{{url_for('adminl')}}">Login as Admin</a></button>
+        <button><a href="{{url_for('medl')}}">Login as Medical</a></button>
+        <button><a href="{{url_for('doclogin')}}">Login as Doctor</a></button>
     </div>
-    
+
     <div class="bubbles">
         <div class="bubble" style="width: 20px; height: 20px; top: 20%; left: 10%; animation-duration: 4s;"></div>
         <div class="bubble" style="width: 30px; height: 30px; top: 60%; left: 30%; animation-duration: 3s;"></div>

@@ -45,32 +45,27 @@
             <table class="table table-bordered align-middle shadow-sm">
                 <thead class="table-light">
                     <tr>
-                        <th>Patient ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Address</th>
-                        <th>Phone</th>
-                        <th>Gender</th>
+                 <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Doctor name</th>
                     <th>Department</th>
-                    <th>Actions</th>
+                    <th>prescription</th>
+                    <th>date</th>
+                    <th>Drugs</th>
                 </tr>
             </thead>
-            <tbody id="resultsBody">
-                {% for book in result %}
+            <tbody>
+                {% for prescription,patient,doctor in press %}
                 <tr>
-                    <td>{{ book.id }}</td>
-                    <td>{{ book.name }}</td>
-                    <td>{{ book.age }}</td>
-                    <td>{{ book.address }}</td>
-                    <td>{{ book.phone }}</td>
-                    <td>{{ book.gender }}</td>
-                    <td>{{ book.department }}</td>
-                    <td>
-                        <form action="{{ url_for('checkin_page') }}" method="POST" style="display:inline;">
-                            <input type="hidden" name="patient_id" value="{{ book.id }}">
-                            <button type="submit" class="btn btn-primary btn-sm">Check In</button>
-                        </form>
-                    </td>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ doctor.name }}</td>
+                    <td>{{doctor.department}}</td>
+                    <td>{{ prescription.prescription_text }}</td>
+                    <td>{{ prescription.date }}</td>
+                    <td><a href="{{ url_for('selectdrug', patient_id=patient.id) }}">drug</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -102,12 +97,7 @@
                                     <td>${book.phone}</td>
                                     <td>${book.gender}</td>
                                     <td>${book.department}</td>
-                                    <td>
-                                        <form action="/checkin" method="POST" style="display:inline;">
-                                            <input type="hidden" name="patient_id" value="${book.id}">
-                                            <button type="submit" class="btn btn-primary btn-sm">Check In</button>
-                                        </form>
-                                    </td>
+                                    
                                 </tr>
                             `;
                                 resultsBody.innerHTML += row;
