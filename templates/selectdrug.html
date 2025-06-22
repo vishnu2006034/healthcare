@@ -8,8 +8,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <h1>Check-In Patient</h1>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar bg-dark text-white p-3 vh-100">
+            <h5 class="mb-4">Menu</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2"><i class="fas fa-users me-2"></i> All Patients</li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('updatedrugs') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> Drugs
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('drughistory') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> History
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ url_for('logout') }}" class="nav-link text-white">
+                        <i class="fas fa-calendar-alt me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    
     <div class="container-fluid p-4">
+        <h2>checkedin patients</h2>
         <form method="post" action="{{ url_for('selectdrug') }}">
             <input type="hidden" name="patient_id" value="{{ patient_id }}">
             <table class="table table-bordered align-middle shadow-sm">
