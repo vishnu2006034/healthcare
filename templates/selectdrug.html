@@ -41,7 +41,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Select</th>
-                        <th>Patient name</th>
+                        
                         <th>Drug ID</th>
                         <th>Drug Name</th>
                         <th>Department</th>
@@ -56,13 +56,7 @@
                         <td>
                             <input type="checkbox" name="selected_drugs" value="{{ drug.id }}">
                         </td>
-                        <td>
-                            {% for p in patients %}
-                                {% if p.id == patient_id|int %}
-                                    {{ p.name }}
-                                {% endif %}
-                            {% endfor %}
-                        </td>
+                       
                         <td>{{ drug.id }}</td>
                         <td>{{ drug.name }}</td>
                         <td>{{ drug.department }}</td>

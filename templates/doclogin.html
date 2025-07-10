@@ -57,6 +57,24 @@
             text-align: center;
             margin-top: 10px;
         }
+        .signup-button {
+    display: inline-block;
+    background-color: #28a745; /* Bootstrap green */
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.signup-button:hover {
+    background-color: #218838;
+    text-decoration: none;
+}
+
     </style>
 </head>
 <body>
@@ -76,7 +94,7 @@
         <div class="signup-link">
           <p>New  <a href="{{ url_for('docreg') }}" class="signup-button">Sign Up</a></p>
       </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="error-message">
                     {% for category, message in messages %}
@@ -84,7 +102,7 @@
                     {% endfor %}
                 </div>
             {% endif %}
-        {% endwith %}
+        {% endwith %} -->
     </form>
 </div>
 

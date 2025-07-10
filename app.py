@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required,UserMixin
 import logger
+
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
 
@@ -25,6 +26,8 @@ def load_user(user_id):
         logger.error(e)
         return None
 
+def without_microseconds():
+    return datetime.utcnow().replace(microsecond=0)
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,13 +55,13 @@ class Doctor(UserMixin,db.Model):
 class Patientin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    check_in_time = db.Column(db.DateTime, default=datetime.utcnow)
+    check_in_time = db.Column(db.DateTime, default=without_microseconds)
     notes = db.Column(db.String(255))
 
 class Patientout(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patientid = db.Column(db.Integer, db.ForeignKey('patient.id'),nullable=False)
-    check_out_time = db.Column(db.DateTime, default=datetime.utcnow)
+    check_out_time = db.Column(db.DateTime, default=without_microseconds)
     notes = db.Column(db.String(255))
 
 class Medical(db.Model):
@@ -77,13 +80,13 @@ class Prescription(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     prescription_text = db.Column(db.Text, nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=without_microseconds)
 
 class DrugsHistory(db.Model):
     id= db.Column(db.Integer, primary_key=True)
     patient_id= db.Column(db.Integer , db.ForeignKey('patient.id'),nullable =False)
     drugs_id = db.Column(db.Integer, db.ForeignKey('drugs.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=without_microseconds)
 
 @app.route('/')
 def index():
