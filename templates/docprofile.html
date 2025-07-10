@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Doctor Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f8;
+      margin: 0;
+      padding: 0;
+    }
+    .profile-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .profile-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .profile-header img {
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border: 3px solid #007BFF;
+    }
+    .profile-header h1 {
+      margin: 15px 0 5px 0;
+      font-size: 28px;
+      color: #333;
+    }
+    .profile-details {
+      font-size: 16px;
+      color: #555;
+    }
+    .profile-details p {
+      margin: 10px 0;
+    }
+    .logout-link {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background-color: #007BFF;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .logout-link:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <div class="profile-header">
+      <img src="{{ url_for('static', filename='profile_photo/' + doctor.picture) }}" alt="Doctor Photo">
+      <h1>Welcome, Dr. {{ doctor.name }}</h1>
+    </div>
+    <div class="profile-details">
+      <p><strong>Department:</strong> {{ doctor.department }}</p>
+      <p><strong>Email:</strong> {{ doctor.email }}</p>
+      <p><strong>Phone:</strong> {{ doctor.phone }}</p>
+      <p><strong>Age:</strong> {{ doctor.age }}</p>
+      <p><strong>Gender:</strong> {{ doctor.gender }}</p>
+      <!-- Placeholder for future fields -->
+      <p><strong>Bio:</strong> This is a placeholder bio. You can update your profile to add more details.</p>
+      <p><strong>Address:</strong> Not provided</p>
+    </div>
+    <a href="{{ url_for('docpro') }}" class="logout-link">Main Page</a>
+  </div>
+</body>
+</html>

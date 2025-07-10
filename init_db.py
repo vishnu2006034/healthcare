@@ -9,8 +9,8 @@ with app.app_context():
     patient2 = Patient(name="Jane Smith", gender="Female", age=25, phone=9876543210, address="456 Elm St", department="ENT")
 
     # Insert sample doctors
-    doctor1 = Doctor(name="Dr. House", gender="Male", age=45, phone=1112223333, email="vishnu@example.com", password="111", department="ENT")
-    doctor2 = Doctor(name="Dr. Wilson", gender="Male", age=50, phone=4445556666, email="tharun@example.com", password="111", department="dental")
+    doctor1 = Doctor(name="Dr. House", gender="Male", age=45, phone=1112223333, email="vishnu@gmail.com", password="111", department="ENT",picture="static/profile_photo/doc1")
+    doctor2 = Doctor(name="Dr. Wilson", gender="Male", age=50, phone=4445556666, email="tharun@gmail.com", password="111", department="dental",picture="static/profile_photo/doc2")
 
     # Insert sample drugs
     drug1 = Drugs(name="Aspirin", department="dental", price=10.0, quantity=100)

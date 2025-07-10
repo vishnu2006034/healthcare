@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required,UserMixin
 import logger
+import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
@@ -13,6 +14,7 @@ def is_active(self):
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret_key'
+app.config['UPLOAD_FOLDER'] = 'static/profile_photo'
 login = LoginManager(app)
 login.login_view = 'doclogin'
 
@@ -51,6 +53,7 @@ class Doctor(UserMixin,db.Model):
     email = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
+    picture = db.Column(db.String,nullable=False)
 
 class Patientin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -143,8 +146,12 @@ def docreg():
         age = request.form.get('age')
         gender = request.form.get('gender')
         password = request.form.get('password')
-        
-        newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password)
+        picture = request.files['picture']
+        upload_folder = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+        os.makedirs(upload_folder, exist_ok=True)
+        filepath = os.path.join(upload_folder, picture.filename)  # for uploading the file
+        picture.save(filepath)
+        newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password,picture=picture.filename)
         db.session.add(newdoc)
         db.session.commit()
         flash("account is successfully created", "success")
@@ -161,7 +168,8 @@ def doclogin():
         email = request.form.get('email')
         password = request.form.get('password')
         doc = Doctor.query.filter_by(email=email).first()
-        if doc and doc.password == password:  # if the email and pass match show the profile
+        if doc and doc.password == password:
+            session['doctor_id'] = doc.id      # if the email and pass match show the profile
             login_user(doc)
             return redirect(url_for('docpro'))
         else:
@@ -388,6 +396,13 @@ def updatedrugs():
 def drughistory():
     drug = db.session.query(DrugsHistory,Patient,Drugs).join(Patient,DrugsHistory.patient_id==Patient.id).join(Drugs,DrugsHistory.drugs_id==Drugs.id).all()
     return render_template("drughistory" ,drugs=drug)
+
+from flask_login import login_required, current_user
+
+@app.route('/docprofile')
+@login_required
+def docprofile():
+    return render_template('docprofile.html', doctor=current_user)
 
 @app.route("/logout")
 def logout():
