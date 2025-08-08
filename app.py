@@ -316,41 +316,55 @@ def selectdrug():
         if not patient_id:
             flash('Patient ID is required to select drugs.', 'error')
             return redirect(url_for('medp'))
-        drugs = Drugs.query.all()
-        for drug in drugs:
-            key = f'quantity_{drug.id}'
-            input_value = request.form.get(key, '').strip()
-            if input_value:
-                try:
-                    if input_value.startswith('+'):
-                        change = int(input_value[1:])
-                        drug.quantity += change
-                    elif input_value.startswith('-'):
-                        change = int(input_value[1:])
-                        drug.quantity -= change
-                    else:
-                        drug.quantity = int(input_value)
-                except:
-                    flash('Invalid input for drug quantity.')
+        
         selected_drugs = request.form.getlist('selected_drugs')
         if not selected_drugs:
             flash('Please select at least one drug.', 'error')
             return redirect(url_for('selectdrug', patient_id=patient_id))
+        
         try:
+            # Process each selected drug
             for drug_id in selected_drugs:
-                drug_history = DrugsHistory(patient_id=patient_id, drugs_id=int(drug_id))
+                drug_id = int(drug_id)
+                quantity_key = f'quantity_{drug_id}'
+                requested_quantity = int(request.form.get(quantity_key, 1))
+                
+                # Get the drug from database
+                drug = Drugs.query.get(drug_id)
+                if not drug:
+                    flash(f'Drug with ID {drug_id} not found.', 'error')
+                    continue
+                
+                # Check if sufficient quantity is available
+                if drug.quantity < requested_quantity:
+                    flash(f'Insufficient quantity for {drug.name}. Available: {drug.quantity}, Requested: {requested_quantity}', 'error')
+                    continue
+                
+                # Deduct the quantity from drug inventory
+                drug.quantity -= requested_quantity
+                
+                # Add to drug history
+                drug_history = DrugsHistory(patient_id=patient_id, drugs_id=drug_id)
                 db.session.add(drug_history)
+            
             db.session.commit()
-            flash('Selected drugs added to history successfully.', 'success')
+            flash('Selected drugs added to history and quantities deducted successfully.', 'success')
+            
+        except ValueError as e:
+            db.session.rollback()
+            flash('Invalid quantity value provided.', 'error')
         except Exception as e:
             db.session.rollback()
-            flash(f'Error adding drugs to history: {str(e)}', 'error')
+            flash(f'Error processing drug selection: {str(e)}', 'error')
+        
         return redirect(url_for('selectdrug', patient_id=patient_id))
+    
     else:
         patient_id = request.args.get('patient_id')
         if not patient_id:
             flash('Patient ID is required to select drugs.', 'error')
             return redirect(url_for('medp'))
+        
         drug1 = Drugs.query.all()
         patient = Patient.query.all()
         return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id)
