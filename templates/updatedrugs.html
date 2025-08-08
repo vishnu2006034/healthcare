@@ -68,13 +68,13 @@
 <body>
     <div class="container">
         <h1>Update Drugs</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="flash-message {{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
-        {% endwith %}
+        {% endwith %} -->
         <form method="post" action="{{ url_for('updatedrugs') }}">
             <table class="table table-bordered table-hover">
                 <thead>
