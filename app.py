@@ -3,11 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required,UserMixin
-import logger
+import logging
 import os
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def is_active(self):
         return True
@@ -25,7 +28,7 @@ def load_user(user_id):
     try:
         return Doctor.query.get(int(user_id))
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Error loading user {user_id}: {e}")
         return None
 
 def without_microseconds():
@@ -176,7 +179,6 @@ def doclogin():
             flash("login details is wrong", "error")
     return render_template("doclogin.html")
 
-
 @app.route("/docpro")
 @login_required
 def docpro ():
@@ -225,7 +227,6 @@ def search():
         })
 
     return jsonify(data)
-
 
 @app.route('/checkin', methods=['GET', 'POST'])
 def checkin_page():
