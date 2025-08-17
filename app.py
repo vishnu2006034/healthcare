@@ -425,6 +425,10 @@ def logout():
     return redirect(url_for('index'))
     
 
+# Register the analytics blueprint
+from analytic import analytics_bp
+app.register_blueprint(analytics_bp)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

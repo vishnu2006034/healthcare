@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Analytics Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { text-align: center; }
+        .chart-container {
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+            margin: 1%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Hospital Analytics Dashboard</h2>
+
+    <div class="chart-container"><div id="age_dist"></div></div>
+    <div class="chart-container"><div id="gender_ratio"></div></div>
+    <div class="chart-container"><div id="department_count"></div></div>
+    <div class="chart-container"><div id="age_by_department"></div></div>
+
+    <script>
+    var charts = {{ charts | tojson | safe }};
+
+    // Each chart is a JSON string, so we parse them
+    var age_dist = JSON.parse(charts.age_dist);
+    var gender_ratio = JSON.parse(charts.gender_ratio);
+    var department_count = JSON.parse(charts.department_count);
+    var age_by_department = JSON.parse(charts.age_by_department);
+
+    Plotly.newPlot('age_dist', age_dist.data, age_dist.layout);
+    Plotly.newPlot('gender_ratio', gender_ratio.data, gender_ratio.layout);
+    Plotly.newPlot('department_count', department_count.data, department_count.layout);
+    Plotly.newPlot('age_by_department', age_by_department.data, age_by_department.layout);
+</script>
+
+</body>
+</html>
