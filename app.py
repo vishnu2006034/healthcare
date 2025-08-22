@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify,session,Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required,UserMixin
 import logging
 import os
+import json
+from sqlalchemy import func
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
 
@@ -428,6 +430,30 @@ def logout():
 # Register the analytics blueprint
 from analytic import analytics_bp
 app.register_blueprint(analytics_bp)
+
+analytics_bp = Blueprint("analytics", __name__)
+
+@analytics_bp.route("/analytics/patients_by_dept")
+def patients_by_dept():
+    result = db.session.query(
+        Patient.department, func.count(Patient.id)
+    ).group_by(Patient.department).all()
+
+    depts = [r[0] for r in result]
+    counts = [r[1] for r in result]
+
+    # Convert to JSON so JavaScript can read them
+    return render_template(
+        "patients_by_dept.html",
+        depts=json.dumps(depts),
+        counts=json.dumps(counts)
+    )   
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+
 
 if __name__ == '__main__':
     with app.app_context():

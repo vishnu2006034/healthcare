@@ -1,40 +1,48 @@
 from flask import Blueprint, render_template
-from app import db, Patient
-import pandas as pd
-import plotly.express as px
-import json
+from sqlalchemy import func
+from app import db
+from app import Patient, Doctor, Drugs, Patientin, Patientout, Prescription, DrugsHistory
 
-analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
+analytics_bp = Blueprint("analytics", __name__)
 
-@analytics_bp.route("/dashboard")
-def analytics_dashboard():
-    # Query patient data
-    patients = Patient.query.all()
-    data = [{"age": p.age, "gender": p.gender, "department": p.department} for p in patients]
-    df = pd.DataFrame(data)
+# --- Patients per department ---
+@analytics_bp.route("/analytics/patients_by_dept")
+def patients_by_dept():
+    result = db.session.query(
+        Patient.department, func.count(Patient.id)
+    ).group_by(Patient.department).all()
 
-    charts = {}
+    depts = [r[0] for r in result]
+    counts = [r[1] for r in result]
 
-    # 1. Age Distribution
-    fig1 = px.histogram(df, x="age", nbins=10, title="Patient Age Distribution")
-    fig1.update_layout(template="plotly_white")
-    charts["age_dist"] = json.dumps(fig1, cls=px.utils.PlotlyJSONEncoder)
+    return render_template("patients_by_dept.html", depts=depts, counts=counts)
 
-    # 2. Gender Ratio
-    fig2 = px.pie(df, names="gender", title="Gender Ratio")
-    fig2.update_layout(template="plotly_white")
-    charts["gender_ratio"] = json.dumps(fig2, cls=px.utils.PlotlyJSONEncoder)
+# --- Doctors per department ---
+@analytics_bp.route("/analytics/doctors_by_dept")
+def doctors_by_dept():
+    result = db.session.query(
+        Doctor.department, func.count(Doctor.id)
+    ).group_by(Doctor.department).all()
 
-    # 3. Department Count (replacing Disease Count)
-    fig3 = px.bar(df["department"].value_counts().reset_index(),
-                  x="index", y="department", title="Department Frequency",
-                  labels={"index": "Department", "department": "Number of Patients"})
-    fig3.update_layout(template="plotly_white")
-    charts["department_count"] = json.dumps(fig3, cls=px.utils.PlotlyJSONEncoder)
+    depts = [r[0] for r in result]
+    counts = [r[1] for r in result]
 
-    # 4. Age by Department (replacing Age by Disease)
-    fig4 = px.box(df, x="department", y="age", title="Age Distribution by Department")
-    fig4.update_layout(template="plotly_white")
-    charts["age_by_department"] = json.dumps(fig4, cls=px.utils.PlotlyJSONEncoder)
+    return render_template("doctors_by_dept.html", depts=depts, counts=counts)
 
-    return render_template("dashboard.html", charts=charts)
+# --- Drugs low stock ---
+@analytics_bp.route("/analytics/drugs_low_stock")
+def drugs_low_stock():
+    result = db.session.query(Drugs.name, Drugs.quantity).filter(Drugs.quantity < 10).all()
+    names = [r[0] for r in result]
+    qtys = [r[1] for r in result]
+
+    return render_template("drugs_low_stock.html", names=names, qtys=qtys)
+
+# --- Average stay duration ---
+@analytics_bp.route("/analytics/avg_stay")
+def avg_stay():
+    result = db.session.query(
+        func.avg(func.julianday(Patientout.check_out_time) - func.julianday(Patientin.check_in_time))
+    ).join(Patientout, Patientin.patient_id == Patientout.patientid).scalar()
+
+    return render_template("avg_stay.html", avg_days=result)

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patients by Department</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Patients by Department</h2>
+    <canvas id="patientsChart"></canvas>
+    <script>
+        const depts = {{ depts | safe }};
+        const counts = {{ counts | safe }};
+
+        const ctx = document.getElementById('patientsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: depts,
+                datasets: [{
+                    label: 'Patients per Department',
+                    data: counts,
+                    borderWidth: 1,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
