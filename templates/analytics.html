@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hospital Analytics</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
@@ -15,18 +13,17 @@
     header{padding:24px 20px 8px}
     h1{margin:0;font-weight:800;letter-spacing:-.02em}
     .wrap{max-width:1100px;margin:0 auto;padding:12px 20px 40px}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-    .card{grid-column:span 12;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}
-    @media (min-width:900px){.card.half{grid-column:span 6}}
-    .card h2{margin:0 0 10px 0;font-size:18px;font-weight:700;color:#f3f4f6}
-    .row{display:flex;gap:12px;align-items:center}
-    .chip{font-size:12px;padding:4px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#d1d5db}
-    .toolbar{display:flex;gap:10px;align-items:center;margin-top:8px}
-    button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#e5e7eb;padding:8px 12px;border-radius:10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;min-height:300px;display:flex;flex-direction:column}
+    .card h2{margin:0 0 10px 0;font-size:16px;font-weight:700;color:#f3f4f6}
+    .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+    button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#e5e7eb;padding:6px 10px;border-radius:8px;font-size:13px}
     button:disabled{opacity:.6;cursor:not-allowed}
     .status{font-size:12px;color:var(--muted)}
-    .table{width:100%;border-collapse:collapse;margin-top:10px}
-    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px 6px;text-align:left}
+    canvas{flex:1;max-height:180px !important}
+    .table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:6px;text-align:left}
+    .table tbody tr:nth-child(odd){background:rgba(255,255,255,.03)}
     .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(125,211,252,.15);border:1px solid rgba(125,211,252,.35);color:#e0f2fe;font-size:12px}
     .error{color:var(--danger)}
   </style>
@@ -34,28 +31,28 @@
 <body>
   <header class="wrap">
     <h1>Hospital Analytics</h1>
-    <div class="row"><span class="chip">/analytics/patients-per-department</span><span class="chip">/analytics/drugs-per-department</span><span class="chip">/analytics/top-doctors</span></div>
+    <!-- <div class="row"><span class="chip">/analytics/patients-per-department</span><span class="chip">/analytics/drugs-per-department</span><span class="chip">/analytics/top-doctors</span></div> -->
   </header>
 
   <main class="wrap">
     <div class="grid">
-      <section class="card half">
+      <section class="card">
         <h2>Patients per Department</h2>
         <div class="toolbar">
           <button id="refreshPatients">Refresh</button>
           <span id="patientsStatus" class="status"></span>
         </div>
-        <canvas id="patientsChart" height="140"></canvas>
+        <canvas id="patientsChart"></canvas>
         <table class="table" id="patientsTable"></table>
       </section>
 
-      <section class="card half">
+      <section class="card">
         <h2>Drugs Stock by Department</h2>
         <div class="toolbar">
           <button id="refreshDrugs">Refresh</button>
           <span id="drugsStatus" class="status"></span>
         </div>
-        <canvas id="drugsChart" height="140"></canvas>
+        <canvas id="drugsChart"></canvas>
         <table class="table" id="drugsTable"></table>
       </section>
 
@@ -65,7 +62,7 @@
           <button id="refreshDoctors">Refresh</button>
           <span id="doctorsStatus" class="status"></span>
         </div>
-        <canvas id="doctorsChart" height="140"></canvas>
+        <canvas id="doctorsChart"></canvas>
         <table class="table" id="doctorsTable"></table>
       </section>
     </div>
@@ -75,14 +72,14 @@
     // Helpers
     function byId(id){return document.getElementById(id)}
     function status(el, msg, isError=false){el.textContent = msg; el.classList.toggle('error', !!isError)}
-    function toLabelsData(obj){
-      const labels = Object.keys(obj||{})
-      const data = labels.map(k => obj[k])
-      return { labels, data }
-    }
-    function drawBarChart(ctx, labels, data, label){
+    function toLabelsData(obj){ const labels = Object.keys(obj||{}); const data = labels.map(k => obj[k]); return { labels, data }}
+    function drawBarChart(ctx, labels, data, label, color='rgba(125,211,252,0.7)'){
       if(ctx.__chart){ctx.__chart.destroy()}
-      ctx.__chart = new Chart(ctx, {type:'bar', data:{labels, datasets:[{label, data}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true}}}})
+      ctx.__chart = new Chart(ctx, {
+        type:'bar',
+        data:{labels, datasets:[{label, data, backgroundColor:color}]},
+        options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true}}}
+      })
     }
     function renderTable(el, obj, headers){
       const labels = Object.keys(obj||{})
@@ -91,59 +88,44 @@
     }
 
     // Fetchers
-    async function loadJSON(url){
-      const r = await fetch(url)
-      if(!r.ok) throw new Error(`HTTP ${r.status}`)
-      return r.json()
-    }
+    async function loadJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() }
 
-    // Patients per department
     async function refreshPatients(){
-      const s = byId('patientsStatus')
-      status(s, 'Loading...')
+      const s = byId('patientsStatus'); status(s, 'Loading...')
       try{
         const data = await loadJSON('/analytics/patients-per-department')
         const {labels, data:vals} = toLabelsData(data)
         drawBarChart(byId('patientsChart'), labels, vals, 'Patients')
         renderTable(byId('patientsTable'), data, ['Department','Patients'])
-        status(s, `Updated ${new Date().toLocaleString()}`)
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
       }catch(e){ status(s, e.message, true) }
     }
-
-    // Drugs per department
     async function refreshDrugs(){
-      const s = byId('drugsStatus')
-      status(s, 'Loading...')
+      const s = byId('drugsStatus'); status(s, 'Loading...')
       try{
         const data = await loadJSON('/analytics/drugs-per-department')
         const {labels, data:vals} = toLabelsData(data)
-        drawBarChart(byId('drugsChart'), labels, vals, 'Available Stock')
+        drawBarChart(byId('drugsChart'), labels, vals, 'Available Stock','rgba(34,197,94,0.7)')
         renderTable(byId('drugsTable'), data, ['Department','Qty'])
-        status(s, `Updated ${new Date().toLocaleString()}`)
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
       }catch(e){ status(s, e.message, true) }
     }
-
-    // Top doctors
     async function refreshDoctors(){
-      const s = byId('doctorsStatus')
-      status(s, 'Loading...')
+      const s = byId('doctorsStatus'); status(s, 'Loading...')
       try{
-        const arr = await loadJSON('/analytics/top-doctors') // expected: [{name:'Dr X', patients:10}, ...]
-        const labels = arr.map(x=>x.name)
-        const vals = arr.map(x=>x.patients)
-        drawBarChart(byId('doctorsChart'), labels, vals, 'Active Patients')
+        const arr = await loadJSON('/analytics/top-doctors')
+        const labels = arr.map(x=>x.name), vals = arr.map(x=>x.patients)
+        drawBarChart(byId('doctorsChart'), labels, vals, 'Active Patients','rgba(239,68,68,0.7)')
         const rows = arr.map(x=>`<tr><td>${x.name}</td><td><span class="badge">${x.patients}</span></td></tr>`).join('')
         byId('doctorsTable').innerHTML = `<thead><tr><th>Doctor</th><th>Patients</th></tr></thead><tbody>${rows}</tbody>`
-        status(s, `Updated ${new Date().toLocaleString()}`)
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
       }catch(e){ status(s, e.message, true) }
     }
 
-    // Wire buttons
     byId('refreshPatients').addEventListener('click', refreshPatients)
     byId('refreshDrugs').addEventListener('click', refreshDrugs)
     byId('refreshDoctors').addEventListener('click', refreshDoctors)
 
-    // Initial load
     refreshPatients(); refreshDrugs(); refreshDoctors();
   </script>
 </body>

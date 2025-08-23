@@ -6,13 +6,20 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 import logging
 import os
 import json
-from sqlalchemy import func
+from models import db,Admin,Patient,Medical,Drugs,Doctor ,Patientin,Patientout,Prescription,DrugsHistory # ✅ import db from models
+from analytics import analytics_bp
+# from sqlalchemy import func
+# from analytics import analytics_bp
+# app.register_blueprint(analytics_bp)
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/')
-
+# from analytics import analytics_bp 
+# app.register_blueprint(analytics_bp)
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
 logger = logging.getLogger(__name__)
+
 
 def is_active(self):
         return True
@@ -23,7 +30,8 @@ app.config['UPLOAD_FOLDER'] = 'static/profile_photo'
 login = LoginManager(app)
 login.login_view = 'doclogin'
 
-db = SQLAlchemy(app)
+db.init_app(app)
+app.register_blueprint(analytics_bp, url_prefix="/analytics")
 
 @login.user_loader
 def load_user(user_id):
@@ -33,68 +41,71 @@ def load_user(user_id):
         logger.error(f"Error loading user {user_id}: {e}")
         return None
 
-def without_microseconds():
-    return datetime.utcnow().replace(microsecond=0)
+# def without_microseconds():
+#     return datetime.utcnow().replace(microsecond=0)
 
-class Admin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(150))
+# class Admin(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     password = db.Column(db.String(150))
 
-class Patient(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    gender = db.Column(db.String, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    phone = db.Column(db.Integer, nullable=False)
-    address = db.Column(db.String, nullable=False)
-    department = db.Column(db.String, nullable=False)
+# class Patient(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable=False)
+#     gender = db.Column(db.String, nullable=False)
+#     age = db.Column(db.Integer, nullable=False)
+#     phone = db.Column(db.Integer, nullable=False)
+#     address = db.Column(db.String, nullable=False)
+#     department = db.Column(db.String, nullable=False)
 
-class Doctor(UserMixin,db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    gender = db.Column(db.String, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    phone = db.Column(db.Integer, nullable=False)
-    email = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    department = db.Column(db.String, nullable=False)
-    picture = db.Column(db.String,nullable=False)
+# class Doctor(UserMixin,db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable=False)
+#     gender = db.Column(db.String, nullable=False)
+#     age = db.Column(db.Integer, nullable=False)
+#     phone = db.Column(db.Integer, nullable=False)
+#     email = db.Column(db.String, nullable=False)
+#     password = db.Column(db.String, nullable=False)
+#     department = db.Column(db.String, nullable=False)
+#     picture = db.Column(db.String,nullable=False)
 
-class Patientin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    check_in_time = db.Column(db.DateTime, default=without_microseconds)
-    notes = db.Column(db.String(255))
+# class Patientin(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+#     check_in_time = db.Column(db.DateTime, default=without_microseconds)
+#     notes = db.Column(db.String(255))
 
-class Patientout(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    patientid = db.Column(db.Integer, db.ForeignKey('patient.id'),nullable=False)
-    check_out_time = db.Column(db.DateTime, default=without_microseconds)
-    notes = db.Column(db.String(255))
+# class Patientout(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     patientid = db.Column(db.Integer, db.ForeignKey('patient.id'),nullable=False)
+#     check_out_time = db.Column(db.DateTime, default=without_microseconds)
+#     notes = db.Column(db.String(255))
 
-class Medical(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    password = db.Column(db.String(15))
+# class Medical(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     password = db.Column(db.String(15))
 
-class Drugs(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    department = db.Column(db.String(100), nullable = False)
-    price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=True)
+# class Drugs(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable=False, unique=True)
+#     department = db.Column(db.String(100), nullable = False)
+#     price = db.Column(db.Float, nullable=False)
+#     quantity = db.Column(db.Integer, nullable=True)
 
-class Prescription(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
-    prescription_text = db.Column(db.Text, nullable=False)
-    date = db.Column(db.DateTime, default=without_microseconds)
+# class Prescription(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+#     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+#     prescription_text = db.Column(db.Text, nullable=False)
+#     date = db.Column(db.DateTime, default=without_microseconds)
 
-class DrugsHistory(db.Model):
-    id= db.Column(db.Integer, primary_key=True)
-    patient_id= db.Column(db.Integer , db.ForeignKey('patient.id'),nullable =False)
-    drugs_id = db.Column(db.Integer, db.ForeignKey('drugs.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=without_microseconds)
+# class DrugsHistory(db.Model):
+#     id= db.Column(db.Integer, primary_key=True)
+#     patient_id= db.Column(db.Integer , db.ForeignKey('patient.id'),nullable =False)
+#     drugs_id = db.Column(db.Integer, db.ForeignKey('drugs.id'), nullable=False)
+#     timestamp = db.Column(db.DateTime, default=without_microseconds)
+
+# from analytics import analytics_bp
+# app.register_blueprint(analytics_bp)
 
 @app.route('/')
 def index():
@@ -453,8 +464,7 @@ def logout():
 # import pandas as pd
 # import numpy as np
 
-from analytics import analytics_bp
-app.register_blueprint(analytics_bp, url_prefix="/analytics")
+
 
 
 if __name__ == '__main__':

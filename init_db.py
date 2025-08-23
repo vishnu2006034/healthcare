@@ -1,4 +1,5 @@
-from app import db, app, Patient, Doctor, Drugs
+# from app import db, app, Patient, Doctor, Drugs
+from model import db,Patient,Doctor,drug
 
 with app.app_context():
     db.create_all()
