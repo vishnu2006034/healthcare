@@ -428,31 +428,33 @@ def logout():
     
 
 # Register the analytics blueprint
-from analytic import analytics_bp
-app.register_blueprint(analytics_bp)
+# from analytic import analytics_bp
+# app.register_blueprint(analytics_bp)
 
-analytics_bp = Blueprint("analytics", __name__)
+# analytics_bp = Blueprint("analytics", __name__)
 
-@analytics_bp.route("/analytics/patients_by_dept")
-def patients_by_dept():
-    result = db.session.query(
-        Patient.department, func.count(Patient.id)
-    ).group_by(Patient.department).all()
+# @analytics_bp.route("/analytics/patients_by_dept")
+# def patients_by_dept():
+#     result = db.session.query(
+#         Patient.department, func.count(Patient.id)
+#     ).group_by(Patient.department).all()
 
-    depts = [r[0] for r in result]
-    counts = [r[1] for r in result]
+#     depts = [r[0] for r in result]
+#     counts = [r[1] for r in result]
 
-    # Convert to JSON so JavaScript can read them
-    return render_template(
-        "patients_by_dept.html",
-        depts=json.dumps(depts),
-        counts=json.dumps(counts)
-    )   
+#     # Convert to JSON so JavaScript can read them
+#     return render_template(
+#         "patients_by_dept.html",
+#         depts=json.dumps(depts),
+#         counts=json.dumps(counts)
+#     )   
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
+# import matplotlib.pyplot as plt
+# import pandas as pd
+# import numpy as np
 
+from analytics import analytics_bp
+app.register_blueprint(analytics_bp, url_prefix="/analytics")
 
 
 if __name__ == '__main__':
