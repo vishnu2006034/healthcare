@@ -8,6 +8,7 @@ import os
 import json
 from models import db,Admin,Patient,Medical,Drugs,Doctor ,Patientin,Patientout,Prescription,DrugsHistory # ✅ import db from models
 from analytics import analytics_bp
+from analyticsdrug import analyticsdrug_bp
 # from sqlalchemy import func
 # from analytics import analytics_bp
 # app.register_blueprint(analytics_bp)
@@ -32,6 +33,7 @@ login.login_view = 'doclogin'
 
 db.init_app(app)
 app.register_blueprint(analytics_bp, url_prefix="/analytics")
+app.register_blueprint(analyticsdrug_bp,url_prefix="/analyticsdrug")
 
 @login.user_loader
 def load_user(user_id):

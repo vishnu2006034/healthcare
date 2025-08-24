@@ -1,12 +1,12 @@
-# from app import db, app, Patient, Doctor, Drugs
-from model import db,Patient,Doctor,drug
+from app import db, app, Patient, Doctor, Drugs
+from models import db,Patient,Doctor,Drug
 
 with app.app_context():
     db.create_all()
     print("Database tables created successfully.")
 
     # Insert sample patients
-    patient1 = Patient(name="John Doe", gender="Male", age=30, phone=1234567890, address="123 Main St", department="dental")
+    patient1 = Patient(name="John Doe", gender="Male", age=30, phone=1234567890, address="123 Main St", department="Dental")
     patient2 = Patient(name="Jane Smith", gender="Female", age=25, phone=9876543210, address="456 Elm St", department="ENT")
 #     patient1 = Patient(name="Arjun Mehta", gender="Male", age=34, phone=9876501234, address="12 MG Road", department="Dental")
 # patient2 = Patient(name="Priya Sharma", gender="Female", age=28, phone=9123456789, address="45 Residency St", department="Dental")

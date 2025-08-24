@@ -47,24 +47,26 @@
       </section>
 
       <section class="card">
-        <h2>Drugs Stock by Department</h2>
-        <div class="toolbar">
-          <button id="refreshDrugs">Refresh</button>
-          <span id="drugsStatus" class="status"></span>
-        </div>
-        <canvas id="drugsChart"></canvas>
-        <table class="table" id="drugsTable"></table>
-      </section>
+  <h2>Patients by Age Group</h2>
+  <div class="toolbar">
+    <button id="refreshAge">Refresh</button>
+    <span id="ageStatus" class="status"></span>
+  </div>
+  <canvas id="ageChart"></canvas>
+  <table class="table" id="ageTable"></table>
+</section>
+
 
       <section class="card">
-        <h2>Top Doctors by Active Patients</h2>
-        <div class="toolbar">
-          <button id="refreshDoctors">Refresh</button>
-          <span id="doctorsStatus" class="status"></span>
-        </div>
-        <canvas id="doctorsChart"></canvas>
-        <table class="table" id="doctorsTable"></table>
-      </section>
+      <h2>Patients Check-in vs Check-out</h2>
+      <div class="toolbar">
+        <button id="refreshStatus">Refresh</button>
+        <span id="statusStatus" class="status"></span>
+      </div>
+      <canvas id="statusChart"></canvas>
+      <table class="table" id="statusTable"></table>
+    </section>
+
     </div>
   </main>
 
@@ -100,31 +102,41 @@
         status(s, `Updated ${new Date().toLocaleTimeString()}`)
       }catch(e){ status(s, e.message, true) }
     }
-    async function refreshDrugs(){
-      const s = byId('drugsStatus'); status(s, 'Loading...')
-      try{
-        const data = await loadJSON('/analytics/drugs-per-department')
-        const {labels, data:vals} = toLabelsData(data)
-        drawBarChart(byId('drugsChart'), labels, vals, 'Available Stock','rgba(34,197,94,0.7)')
-        renderTable(byId('drugsTable'), data, ['Department','Qty'])
-        status(s, `Updated ${new Date().toLocaleTimeString()}`)
-      }catch(e){ status(s, e.message, true) }
-    }
-    async function refreshDoctors(){
-      const s = byId('doctorsStatus'); status(s, 'Loading...')
-      try{
-        const arr = await loadJSON('/analytics/top-doctors')
-        const labels = arr.map(x=>x.name), vals = arr.map(x=>x.patients)
-        drawBarChart(byId('doctorsChart'), labels, vals, 'Active Patients','rgba(239,68,68,0.7)')
-        const rows = arr.map(x=>`<tr><td>${x.name}</td><td><span class="badge">${x.patients}</span></td></tr>`).join('')
-        byId('doctorsTable').innerHTML = `<thead><tr><th>Doctor</th><th>Patients</th></tr></thead><tbody>${rows}</tbody>`
-        status(s, `Updated ${new Date().toLocaleTimeString()}`)
-      }catch(e){ status(s, e.message, true) }
-    }
+    async function refreshAge(){
+  const s = byId('ageStatus'); status(s, 'Loading...')
+  try{
+    const data = await loadJSON('/analytics/patients-by-age-group')
+    // Example response: { "0-18": 5, "19-35": 12, "36-60": 8, "60+": 4 }
+    const {labels, data:vals} = toLabelsData(data)
+    drawBarChart(byId('ageChart'), labels, vals, 'Patients by Age Group','rgba(239,68,68,0.7)')
+    renderTable(byId('ageTable'), data, ['Age Group','Patients'])
+    status(s, `Updated ${new Date().toLocaleTimeString()}`)
+  }catch(e){ status(s, e.message, true) }
+}
+
+byId('refreshAge').addEventListener('click', refreshAge)
+refreshAge()
+
+    async function refreshStatus(){
+  const s = byId('statusStatus'); status(s, 'Loading...')
+  try{
+    const data = await loadJSON('/analytics/patients-checkin-status')
+    // Example backend response: { "Checked-in": 15, "Checked-out": 7 }
+    const {labels, data:vals} = toLabelsData(data)
+    drawBarChart(byId('statusChart'), labels, vals, 'Patients Status','rgba(239,68,68,0.7)')
+    renderTable(byId('statusTable'), data, ['Status','Patients'])
+    status(s, `Updated ${new Date().toLocaleTimeString()}`)
+  }catch(e){ status(s, e.message, true) }
+}
+
+byId('refreshStatus').addEventListener('click', refreshStatus)
+refreshStatus()
+
 
     byId('refreshPatients').addEventListener('click', refreshPatients)
     byId('refreshDrugs').addEventListener('click', refreshDrugs)
-    byId('refreshDoctors').addEventListener('click', refreshDoctors)
+    byId('refreshStatus').addEventListener('click', refreshStatus)
+    <!-- byId('refreshDoctors').addEventListener('click', refreshDoctors) -->
 
     refreshPatients(); refreshDrugs(); refreshDoctors();
   </script>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hospital Drug Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--bg:#0b1221;--card:#121a2b;--muted:#b7c0d1;--accent:#7dd3fc;--danger:#ef4444}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#0b1221,#10172a);color:#e5e7eb}
+    header{padding:24px 20px 8px}
+    h1{margin:0;font-weight:800}
+    .wrap{max-width:1100px;margin:0 auto;padding:12px 20px 40px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;min-height:300px;display:flex;flex-direction:column}
+    .card h2{margin:0 0 10px;font-size:16px;font-weight:700}
+    .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+    button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#e5e7eb;padding:6px 10px;border-radius:8px;font-size:13px}
+    .status{font-size:12px;color:var(--muted)}
+    .error{color:var(--danger)}
+    canvas{flex:1;max-height:180px !important}
+    .table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:6px;text-align:left}
+    .table tbody tr:nth-child(odd){background:rgba(255,255,255,.03)}
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <h1>Hospital Drug Analytics</h1>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <!-- Drugs per Department -->
+      <section class="card">
+        <h2>Drugs per Department</h2>
+        <div class="toolbar">
+          <button id="refreshDrugsDept">Refresh</button>
+          <span id="drugsDeptStatus" class="status"></span>
+        </div>
+        <canvas id="drugsDeptChart"></canvas>
+        <table class="table" id="drugsDeptTable"></table>
+      </section>
+
+      <!-- Drugs Stock Value -->
+      <section class="card">
+        <h2>Drugs Stock Value</h2>
+        <div class="toolbar">
+          <button id="refreshDrugsValue">Refresh</button>
+          <span id="drugsValueStatus" class="status"></span>
+        </div>
+        <canvas id="drugsValueChart"></canvas>
+        <table class="table" id="drugsValueTable"></table>
+      </section>
+
+      <!-- Low Stock Drugs -->
+      <section class="card">
+        <h2>Low Stock Drugs</h2>
+        <div class="toolbar">
+          <button id="refreshDrugsLow">Refresh</button>
+          <span id="drugsLowStatus" class="status"></span>
+        </div>
+        <table class="table" id="drugsLowTable"></table>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Helpers
+    function byId(id){return document.getElementById(id)}
+    function status(el,msg,isError=false){el.textContent=msg;el.classList.toggle('error',isError)}
+    function toLabelsData(obj){const labels=Object.keys(obj||{});const data=labels.map(k=>obj[k]);return {labels,data}}
+    function drawBarChart(ctx,labels,data,label,color='rgba(125,211,252,0.7)'){
+      if(ctx.__chart) ctx.__chart.destroy()
+      ctx.__chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:color}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}})
+    }
+    function renderTable(el,obj,headers){
+      const labels=Object.keys(obj||{})
+      const rows=labels.map(k=>`<tr><td>${k}</td><td>${obj[k]}</td></tr>`).join('')
+      el.innerHTML=`<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody>`
+    }
+
+    // Fetchers
+    async function fetchDrugsDept(){
+      const s=byId('drugsDeptStatus')
+      status(s,'Loading...')
+      try{
+        const r=await fetch('/analytics/drugs-per-department')
+        const d=await r.json()
+        const {labels,data}=toLabelsData(d)
+        drawBarChart(byId('drugsDeptChart'),labels,data,'Drugs per Dept')
+        renderTable(byId('drugsDeptTable'),d,['Department','Drugs'])
+        status(s,'Updated')
+      }catch(e){status(s,'Error',true)}
+    }
+
+    async function fetchDrugsValue(){
+      const s=byId('drugsValueStatus')
+      status(s,'Loading...')
+      try{
+        const r=await fetch('/analytics/drugs-stock-value')
+        const d=await r.json()
+        const {labels,data}=toLabelsData(d)
+        drawBarChart(byId('drugsValueChart'),labels,data,'Stock Value')
+        renderTable(byId('drugsValueTable'),d,['Department','Stock Value'])
+        status(s,'Updated')
+      }catch(e){status(s,'Error',true)}
+    }
+
+    async function fetchDrugsLow(){
+      const s=byId('drugsLowStatus')
+      status(s,'Loading...')
+      try{
+        const r=await fetch('/analytics/low-stock-drugs')
+        const d=await r.json()
+        const rows=d.map(drug=>`<tr><td>${drug.name}</td><td>${drug.department}</td><td>${drug.quantity}</td></tr>`).join('')
+        byId('drugsLowTable').innerHTML=`<thead><tr><th>Name</th><th>Department</th><th>Quantity</th></tr></thead><tbody>${rows}</tbody>`
+        status(s,'Updated')
+      }catch(e){status(s,'Error',true)}
+    }
+
+    // Bind buttons
+    byId('refreshDrugsDept').onclick=fetchDrugsDept
+    byId('refreshDrugsValue').onclick=fetchDrugsValue
+    byId('refreshDrugsLow').onclick=fetchDrugsLow
+
+    // Auto load on startup
+    fetchDrugsDept()
+    fetchDrugsValue()
+    fetchDrugsLow()
+  </script>
+</body>
+</html>
