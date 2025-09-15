@@ -1,81 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hospital Analytics</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <style>
-    :root{--bg:#0b1221;--card:#121a2b;--muted:#b7c0d1;--accent:#7dd3fc;--ok:#22c55e;--danger:#ef4444}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1221 0%, #10172a 100%);color:#e5e7eb}
-    header{padding:24px 20px 8px}
-    h1{margin:0;font-weight:800;letter-spacing:-.02em}
-    .wrap{max-width:1100px;margin:0 auto;padding:12px 20px 40px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;min-height:300px;display:flex;flex-direction:column}
-    .card h2{margin:0 0 10px 0;font-size:16px;font-weight:700;color:#f3f4f6}
-    .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-    button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0f172a;color:#e5e7eb;padding:6px 10px;border-radius:8px;font-size:13px}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .status{font-size:12px;color:var(--muted)}
-    canvas{flex:1;max-height:180px !important}
-    .table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-    .table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:6px;text-align:left}
-    .table tbody tr:nth-child(odd){background:rgba(255,255,255,.03)}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(125,211,252,.15);border:1px solid rgba(125,211,252,.35);color:#e0f2fe;font-size:12px}
-    .error{color:var(--danger)}
-  </style>
-</head>
-<body>
-  <header class="wrap">
-    <h1>Hospital Analytics</h1>
-    <!-- <div class="row"><span class="chip">/analytics/patients-per-department</span><span class="chip">/analytics/drugs-per-department</span><span class="chip">/analytics/top-doctors</span></div> -->
-  </header>
+{% extends 'base.html' %}
 
-  <main class="wrap">
-    <div class="grid">
-      <section class="card">
-        <h2>Patients per Department</h2>
-        <div class="toolbar">
-          <button id="refreshPatients">Refresh</button>
-          <span id="patientsStatus" class="status"></span>
+{% block title %}Hospital Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="text-center my-4">Hospital Analytics</h1>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Patients per Department</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <button id="refreshPatients" class="btn btn-primary btn-sm">Refresh</button>
+                        <span id="patientsStatus" class="text-muted small"></span>
+                    </div>
+                    <canvas id="patientsChart"></canvas>
+                    <table class="table table-sm mt-3" id="patientsTable"></table>
+                </div>
+            </div>
         </div>
-        <canvas id="patientsChart"></canvas>
-        <table class="table" id="patientsTable"></table>
-      </section>
 
-      <section class="card">
-  <h2>Patients by Age Group</h2>
-  <div class="toolbar">
-    <button id="refreshAge">Refresh</button>
-    <span id="ageStatus" class="status"></span>
-  </div>
-  <canvas id="ageChart"></canvas>
-  <table class="table" id="ageTable"></table>
-</section>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Patients by Age Group</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <button id="refreshAge" class="btn btn-primary btn-sm">Refresh</button>
+                        <span id="ageStatus" class="text-muted small"></span>
+                    </div>
+                    <canvas id="ageChart"></canvas>
+                    <table class="table table-sm mt-3" id="ageTable"></table>
+                </div>
+            </div>
+        </div>
 
-
-      <section class="card">
-      <h2>Patients Check-in vs Check-out</h2>
-      <div class="toolbar">
-        <button id="refreshStatus">Refresh</button>
-        <span id="statusStatus" class="status"></span>
-      </div>
-      <canvas id="statusChart"></canvas>
-      <table class="table" id="statusTable"></table>
-    </section>
-
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Patients Check-in vs Check-out</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <button id="refreshStatus" class="btn btn-primary btn-sm">Refresh</button>
+                        <span id="statusStatus" class="text-muted small"></span>
+                    </div>
+                    <canvas id="statusChart"></canvas>
+                    <table class="table table-sm mt-3" id="statusTable"></table>
+                </div>
+            </div>
+        </div>
     </div>
-  </main>
+</div>
 
-  <script>
+<script>
     // Helpers
     function byId(id){return document.getElementById(id)}
     function status(el, msg, isError=false){el.textContent = msg; el.classList.toggle('error', !!isError)}
     function toLabelsData(obj){ const labels = Object.keys(obj||{}); const data = labels.map(k => obj[k]); return { labels, data }}
-    function drawBarChart(ctx, labels, data, label, color='rgba(125,211,252,0.7)'){
+    function drawBarChart(ctx, labels, data, label, color='rgba(0,123,127,0.7)'){
       if(ctx.__chart){ctx.__chart.destroy()}
       ctx.__chart = new Chart(ctx, {
         type:'bar',
@@ -106,7 +92,6 @@
   const s = byId('ageStatus'); status(s, 'Loading...')
   try{
     const data = await loadJSON('/analytics/patients-by-age-group')
-    // Example response: { "0-18": 5, "19-35": 12, "36-60": 8, "60+": 4 }
     const {labels, data:vals} = toLabelsData(data)
     drawBarChart(byId('ageChart'), labels, vals, 'Patients by Age Group','rgba(239,68,68,0.7)')
     renderTable(byId('ageTable'), data, ['Age Group','Patients'])
@@ -121,7 +106,6 @@ refreshAge()
   const s = byId('statusStatus'); status(s, 'Loading...')
   try{
     const data = await loadJSON('/analytics/patients-checkin-status')
-    // Example backend response: { "Checked-in": 15, "Checked-out": 7 }
     const {labels, data:vals} = toLabelsData(data)
     drawBarChart(byId('statusChart'), labels, vals, 'Patients Status','rgba(239,68,68,0.7)')
     renderTable(byId('statusTable'), data, ['Status','Patients'])
@@ -132,13 +116,7 @@ refreshAge()
 byId('refreshStatus').addEventListener('click', refreshStatus)
 refreshStatus()
 
-
     byId('refreshPatients').addEventListener('click', refreshPatients)
-    byId('refreshDrugs').addEventListener('click', refreshDrugs)
-    byId('refreshStatus').addEventListener('click', refreshStatus)
-    <!-- byId('refreshDoctors').addEventListener('click', refreshDoctors) -->
-
-    refreshPatients(); refreshDrugs(); refreshDoctors();
+    refreshPatients();
   </script>
-</body>
-</html>
+{% endblock %}

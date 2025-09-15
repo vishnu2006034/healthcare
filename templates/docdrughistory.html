@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Prescription History{% endblock %}
+
+{% block content %}
+    <h1>My Prescription History</h1>
+    <div class="container-fluid p-4">
+        <table class="table table-bordered align-middle shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Patient Name</th>
+                    <th>Prescription Text</th>
+                    <th>Date Prescribed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription, patient in prescriptions %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ prescription.prescription_text }}</td>
+                    <td>{{ prescription.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('docpro') }}" class="btn btn-primary">Back to Doctor Page</a>
+{% endblock %}

@@ -132,7 +132,8 @@ def adminl():
 
 @app.route('/adminp')
 def adminp():
-    return render_template('adminmain.html')
+    patients = db.session.query(Patientin, Patient).join(Patient, Patientin.patient_id == Patient.id).all()
+    return render_template('adminmain.html', patients=patients)
 
 @app.route('/patreg', methods=["GET", "POST"])
 def patreg():
@@ -316,8 +317,7 @@ def medl():
 
 @app.route('/medp')
 def medp():
-    #press = db.session.query(Prescription,Patient,Doctor).join(Patient,Prescription.patient_id==Patient.id).join(Doctor,Prescription.doctor_id==Doctor.id).all()
-    press = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).all()
+    press = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).join(Patientin, Patientin.patient_id == Patient.id).all()
     return render_template('medpage.html',press=press)
 
 @app.route('/drugsreg',methods=['GET','POST'])
@@ -388,13 +388,23 @@ def selectdrug():
     
     else:
         patient_id = request.args.get('patient_id')
+        dept = request.args.get('dept')
         if not patient_id:
             flash('Patient ID is required to select drugs.', 'error')
             return redirect(url_for('medp'))
-        
-        drug1 = Drugs.query.all()
+
+        patient_obj = Patient.query.get(patient_id)
+        if not patient_obj:
+            flash('Patient not found.', 'error')
+            return redirect(url_for('medp'))
+
+        if dept:
+            drug1 = Drugs.query.filter_by(department=dept).all()
+        else:
+            drug1 = Drugs.query.all()
+        departments = db.session.query(Drugs.department).distinct().all()
         patient = Patient.query.all()
-        return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id)
+        return render_template('selectdrug.html', drugs=drug1, patients=patient, patient_id=patient_id, departments=departments, selected_dept=dept)
 
 @app.route('/updatedrugs', methods=['GET', 'POST'])
 def updatedrugs():
@@ -424,8 +434,14 @@ def updatedrugs():
 
 @app.route('/drughistory')
 def drughistory():
-    drug = db.session.query(DrugsHistory,Patient,Drugs).join(Patient,DrugsHistory.patient_id==Patient.id).join(Drugs,DrugsHistory.drugs_id==Drugs.id).all()
-    return render_template("drughistory" ,drugs=drug)
+    prescriptions = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).all()
+    return render_template("drughistory" ,prescriptions=prescriptions)
+
+@app.route('/docdrughistory')
+@login_required
+def docdrughistory():
+    prescriptions = db.session.query(Prescription, Patient).join(Patient, Prescription.patient_id == Patient.id).filter(Prescription.doctor_id == current_user.id).all()
+    return render_template('docdrughistory.html', prescriptions=prescriptions)
 
 from flask_login import login_required, current_user
 

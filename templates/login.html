@@ -1,158 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
-    <style>
-        :root {
-            --primary-color: #007BFF;
-            --white-color: #ffffff;
-            --button-bg: #ffffff;
-            --button-text: #007BFF;
-            --button-hover-bg: #0056b3;
-            --button-hover-text: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.15);
-            --card-shadow: rgba(0, 0, 0, 0.2);
-        }
+{% extends 'base.html' %}
 
-        * {
-            box-sizing: border-box;
-        }
+{% block title %}Login{% endblock %}
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--primary-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--white-color);
-            overflow: hidden;
-        }
-
-        .bubbles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .bubble {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-            animation: bubble-animation linear infinite;
-        }
-
-        @keyframes bubble-animation {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-120px) scale(1.5);
-                opacity: 0;
-            }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            background: var(--white-color);
-            padding: 3rem 4rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 24px var(--card-shadow);
-            text-align: center;
-            max-width: 360px;
-            width: 90%;
-            backdrop-filter: none;
-            color: var(--primary-color);
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 2rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--primary-color);
-        }
-
-        button {
-            background-color: var(--button-bg);
-            color: var(--button-text);
-            font-size: 1.1rem;
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 30px;
-            margin: 0.5rem 0;
-            width: 100%;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            font-weight: 600;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-        }
-
-        button:hover,
-        button:focus {
-            background-color: var(--button-hover-bg);
-            color: var(--button-hover-text);
-            outline: none;
-            box-shadow: 0 6px 12px rgba(0, 86, 179, 0.6);
-        }
-
-        button a {
-            color: inherit;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 2rem 2.5rem;
-                max-width: 320px;
-            }
-
-            h1 {
-                font-size: 2rem;
-                margin-bottom: 1.5rem;
-            }
-
-            button {
-                font-size: 1rem;
-                padding: 0.65rem 1.5rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Sign in to your Account</h1>
-        <button><a href="{{url_for('adminl')}}">Login as Admin</a></button>
-        <button><a href="{{url_for('medl')}}">Login as Medical</a></button>
-        <button><a href="{{url_for('doclogin')}}">Login as Doctor</a></button>
+{% block content %}
+<div class="welcome-section">
+    <i class="fas fa-user-shield icon-large"></i>
+    <h1>Welcome to Healthcare Management System</h1>
+    <p class="lead">Please select your role to continue</p>
+</div>
+<div class="container" style="max-width: 400px;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Sign in to your Account</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-grid gap-3">
+                <a href="{{ url_for('adminl') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-cog me-2"></i>Login as Admin
+                </a>
+                <a href="{{ url_for('medl') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-md me-2"></i>Login as Medical
+                </a>
+                <a href="{{ url_for('doclogin') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-stethoscope me-2"></i>Login as Doctor
+                </a>
+            </div>
+        </div>
     </div>
-
-    <div class="bubbles">
-        <div class="bubble" style="width: 20px; height: 20px; top: 20%; left: 10%; animation-duration: 4s;"></div>
-        <div class="bubble" style="width: 30px; height: 30px; top: 60%; left: 30%; animation-duration: 3s;"></div>
-        <div class="bubble" style="width: 15px; height: 15px; top: 80%; left: 70%; animation-duration: 5s;"></div>
-        <div class="bubble" style="width: 40px; height: 40px; top: 40%; left: 90%; animation-duration: 6s;"></div>
-        <div class="bubble" style="width: 25px; height: 25px; top: 10%; left: 60%; animation-duration: 7s;"></div>
-        <div class="bubble" style="width: 18px; height: 18px; top: 50%; left: 20%; animation-duration: 2s;"></div>
-        <div class="bubble" style="width: 35px; height: 35px; top: 70%; left: 40%; animation-duration: 4s;"></div>
-        <div class="bubble" style="width: 22px; height: 22px; top: 30%; left: 80%; animation-duration: 5s;"></div>
-    </div>
-</body>
-</html>
+</div>
+{% endblock %}
