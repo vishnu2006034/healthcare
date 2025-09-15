@@ -30,7 +30,7 @@ class Doctor(UserMixin, db.Model):
     email = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
-    picture = db.Column(db.String,nullable=False)
+    picture = db.Column(db.String, nullable=True, default='default_profile.png')
 
 class Patientin(db.Model):
     id = db.Column(db.Integer, primary_key=True)

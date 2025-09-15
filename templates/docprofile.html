@@ -6,8 +6,12 @@
 <div class="container" style="max-width: 600px;">
     <div class="card">
         <div class="card-body text-center">
-            <img src="{{ url_for('static', filename='profile_photo/' + doctor.picture) }}" alt="Doctor Photo" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #007b7f;">
-            <h1>Welcome, Dr. {{ doctor.name }}</h1>
+            {% if doctor.picture %}
+            <img src="{{ url_for('static', filename=doctor.picture) }}" alt="Doctor Photo" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: contain; border: 3px solid #007b7f;" onerror="this.src='https://via.placeholder.com/150x150/007b7f/ffffff?text=Doctor'">
+            {% else %}
+            <img src="https://via.placeholder.com/150x150/007b7f/ffffff?text=Doctor" alt="Doctor Photo" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: contain; border: 3px solid #007b7f;">
+            {% endif %}
+            <h1>Welcome,  {{ doctor.name }}</h1>
         </div>
         <div class="card-body">
             <p><strong>Department:</strong> {{ doctor.department }}</p>

@@ -1,31 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Prescription History{% endblock %}
+{% block title %}Drugs History{% endblock %}
 
 {% block content %}
-<h1>Prescription History</h1>
+<h1>Drugs History</h1>
 <div class="container-fluid p-4">
     <table class="table table-bordered align-middle shadow-sm">
         <thead class="table-light">
             <tr>
-                <th>Patient ID</th>
+                <th>Drug ID</th>
                 <th>Patient Name</th>
-                <th>Doctor Name</th>
-                <th>Prescription Text</th>
-                <th>Date</th>
+                <th>Drug Name</th>
+                <th>Time</th>
             </tr>
         </thead>
         <tbody id="resultsBody">
-            {% for prescription, patient, doctor in prescriptions %}
+            {% for history, patient, drug in drugs %}
             <tr>
                 <td>{{ patient.id }}</td>
                 <td>{{ patient.name }}</td>
-                <td>{{ doctor.name }}</td>
-                <td>{{ prescription.prescription_text }}</td>
-                <td>{{ prescription.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ drug.name }}</td>
+                <td>{{ history.timestamp }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <div class="mt-3">
+        <a href="{{ url_for('medp') }}" class="btn btn-secondary">Back to Medical Page</a>
+    </div>
 </div>
 {% endblock %}

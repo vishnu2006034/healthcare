@@ -5,6 +5,18 @@
 {% block content %}
     <h1>My Prescription History</h1>
     <div class="container-fluid p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <table class="table table-bordered align-middle shadow-sm">
             <thead class="table-light">
                 <tr>
@@ -27,4 +39,14 @@
         </table>
     </div>
     <a href="{{ url_for('docpro') }}" class="btn btn-primary">Back to Doctor Page</a>
+
+    <script>
+        // Remove flash messages after 5 seconds
+        setTimeout(function() {
+            var flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                flashMessages.style.display = 'none';
+            }
+        }, 5000);
+    </script>
 {% endblock %}

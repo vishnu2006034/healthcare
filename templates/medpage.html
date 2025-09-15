@@ -29,6 +29,7 @@
                 <th>Prescription</th>
                 <th>Date</th>
                 <th>Drugs</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -41,6 +42,11 @@
                 <td>{{ prescription.prescription_text }}</td>
                 <td>{{ prescription.date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                 <td><a href="{{ url_for('selectdrug', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Select Drugs</a></td>
+                <td>
+                    <form action="{{ url_for('delete_prescription', prescription_id=prescription.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this prescription?')">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

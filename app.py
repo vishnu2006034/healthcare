@@ -123,10 +123,10 @@ def adminl():
         password = request.form.get('password')
         passes = Admin.query.filter_by(password=code).first()
         if password == passes.password:
-            flash('successfully login')
+            flash('successfully login', 'success')
             return redirect('adminp')
         else:
-            flash('check the password ')
+            flash('check the password ', 'error')
             return redirect(url_for('index'))
     return render_template('adminlogin.html')
 
@@ -165,12 +165,16 @@ def docreg():
         age = request.form.get('age')
         gender = request.form.get('gender')
         password = request.form.get('password')
-        picture = request.files['picture']
-        upload_folder = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-        os.makedirs(upload_folder, exist_ok=True)
-        filepath = os.path.join(upload_folder, picture.filename)  # for uploading the file
-        picture.save(filepath)
-        newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password,picture=picture.filename)
+        picture = request.files.get('picture')
+        if picture and picture.filename:
+            upload_folder = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+            os.makedirs(upload_folder, exist_ok=True)
+            filepath = os.path.join(upload_folder, picture.filename)  # for uploading the file
+            picture.save(filepath)
+            picture_path = 'profile_photo/' + picture.filename
+        else:
+            picture_path = None
+        newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password, picture=picture_path)
         db.session.add(newdoc)
         db.session.commit()
         flash("account is successfully created", "success")
@@ -190,6 +194,7 @@ def doclogin():
         if doc and doc.password == password:
             session['doctor_id'] = doc.id      # if the email and pass match show the profile
             login_user(doc)
+            flash('Login successful', 'success')
             return redirect(url_for('docpro'))
         else:
             flash("login details is wrong", "error")
@@ -308,10 +313,10 @@ def medl():
         password = request.form.get('password')
         passes = Medical.query.filter_by(password=code).first()
         if password == passes.password:
-            flash('successfully login')
+            flash('successfully login', 'success')
             return redirect('medp')
         else:
-            flash('check the password ')
+            flash('check the password ', 'error')
             return redirect(url_for('index'))
     return render_template('medlogin.html')
 
@@ -319,6 +324,14 @@ def medl():
 def medp():
     press = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).join(Patientin, Patientin.patient_id == Patient.id).all()
     return render_template('medpage.html',press=press)
+
+@app.route('/delete_prescription/<int:prescription_id>', methods=['POST'])
+def delete_prescription(prescription_id):
+    prescription = Prescription.query.get_or_404(prescription_id)
+    db.session.delete(prescription)
+    db.session.commit()
+    flash('Prescription deleted successfully.', 'success')
+    return redirect(url_for('medp'))
 
 @app.route('/drugsreg',methods=['GET','POST'])
 def drugsreg():
@@ -434,8 +447,8 @@ def updatedrugs():
 
 @app.route('/drughistory')
 def drughistory():
-    prescriptions = db.session.query(Prescription, Patient, Doctor).join(Patient, Prescription.patient_id == Patient.id).join(Doctor, Prescription.doctor_id == Doctor.id).all()
-    return render_template("drughistory" ,prescriptions=prescriptions)
+    drug = db.session.query(DrugsHistory,Patient,Drugs).join(Patient,DrugsHistory.patient_id==Patient.id).join(Drugs,DrugsHistory.drugs_id==Drugs.id).all()
+    return render_template("drughistory" ,drugs=drug)
 
 @app.route('/docdrughistory')
 @login_required
