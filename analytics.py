@@ -1,115 +1,99 @@
 from flask import Blueprint, render_template, jsonify
+from models import db, Patient, Doctor, Medical, Patientin, Patientout, Prescription, DrugsHistory, Drugs
 from sqlalchemy import func
-from models import db, Patient,Drugs,Doctor,Patientin,Patientout  # ✅ import db and Patient directly
-
-# analytics.py
-
+from datetime import datetime, timedelta
 
 analytics_bp = Blueprint("analytics", __name__)
 
-# Dashboard page
-@analytics_bp.route("/dashboard")
-def analytics_dashboard():
+@analytics_bp.route("/superadmin/dashboard")
+def superadmin_dashboard():
     return render_template("analytics.html")
 
+@analytics_bp.route("/superadmin/workflow")
+def workflow_data():
+    # Total patients registered
+    total_patients = db.session.query(func.count(Patient.id)).scalar() or 0
 
-# Patients per department
+    # Total doctors registered
+    total_doctors = db.session.query(func.count(Doctor.id)).scalar() or 0
+
+    # Total medical staff registered
+    total_medical = db.session.query(func.count(Medical.id)).scalar() or 0
+
+    # Patients currently checked in
+    checked_in = db.session.query(func.count(Patientin.id)).scalar() or 0
+
+    # Patients currently checked out (today)
+    today = datetime.now().date()
+    checked_out = db.session.query(func.count(Patientout.id)).filter(
+        func.date(Patientout.check_out_time) == today
+    ).scalar() or 0
+
+    # Prescriptions count in last 30 days
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+    prescriptions_last_month = db.session.query(func.count(Prescription.id)).filter(
+        Prescription.date >= start_date,
+        Prescription.date <= end_date
+    ).scalar() or 0
+
+    # Drugs inventory summary
+    total_drugs = db.session.query(func.count(Drugs.id)).scalar() or 0
+    total_drugs_quantity = db.session.query(func.sum(Drugs.quantity)).scalar() or 0
+
+    return jsonify({
+        "total_patients": total_patients,
+        "total_doctors": total_doctors,
+        "total_medical": total_medical,
+        "checked_in": checked_in,
+        "checked_out": checked_out,
+        "prescriptions_last_month": prescriptions_last_month,
+        "total_drugs": total_drugs,
+        "total_drugs_quantity": total_drugs_quantity
+    })
+
 @analytics_bp.route("/patients-per-department")
 def patients_per_department():
-    rows = (
-        db.session.query(Patient.department, func.count(Patient.id))
-        .group_by(Patient.department)
-        .all()
-    )
-    return jsonify({dept or "Unknown": int(count) for dept, count in rows})
-
-@analytics_bp.route("/patients-by-gender")
-def patients_by_gender():
-    rows = (
-    db.session.query(Patient.department, Patient.gender, func.count(Patient.id))
-    .group_by(Patient.department, Patient.gender)
-    .all()
-)
-
-    result = {}
-    for dept, gender, count in rows:
-        dept = dept or "Unknown Department"
-        gender = gender or "Unknown Gender"
-        
-        if dept not in result:
-            result[dept] = {}
-        result[dept][gender] = int(count)
-
-    return jsonify(result)
-
-# Drugs per department
-@analytics_bp.route("/drugs-per-department")
-def drugs_per_department():
-    rows = (
-        db.session.query(Drugs.department, func.sum(Drugs.quantity))
-        .group_by(Drugs.department)
-        .all()
-    )
-    return jsonify({dept or "Unknown": int(qty or 0) for dept, qty in rows})
-
-@analytics_bp.route("/drugs-stock-value")
-def drugs_stock_value():
-    rows = (
-        db.session.query(Drugs.department, func.sum(Drugs.price * Drugs.quantity))
-        .group_by(Drugs.department)
-        .all()
-    )
-    return jsonify({dept or "Unknown": float(value) for dept, value in rows})
-
-@analytics_bp.route("/low-stock-drugs")
-def low_stock_drugs():
-    # Define a threshold for low stock (e.g., 10 units)
-    LOW_STOCK_THRESHOLD = 10
-    rows = (
-        db.session.query(Drugs.id, Drugs.name, Drugs.department, Drugs.quantity)
-        .filter(Drugs.quantity <= LOW_STOCK_THRESHOLD)
-        .all()
-    )
-
-    return jsonify([
-        {
-            "id": drug_id,
-            "name": name,
-            "department": dept,
-            "quantity": int(qty),
-            "threshold": LOW_STOCK_THRESHOLD
-        }
-        for drug_id, name, dept, qty in rows
-    ])
+    result = db.session.query(
+        Patient.department, func.count(Patient.id)
+    ).group_by(Patient.department).all()
+    data = {r[0]: r[1] for r in result}
+    return jsonify(data)
 
 @analytics_bp.route("/patients-by-age-group")
 def patients_by_age_group():
-    rows = (
-        db.session.query(Patient.age)
-        .filter(Patient.age != None)
-        .all()
-    )
-
-    groups = {"0-18": 0, "19-35": 0, "36-60": 0, "60+": 0}
+    rows = db.session.query(Patient.age).filter(Patient.age != None).all()
+    age_groups = {"<18": 0, "18-40": 0, "40-60": 0, "60+": 0}
     for (age,) in rows:
-        if age <= 18:
-            groups["0-18"] += 1
-        elif age <= 35:
-            groups["19-35"] += 1
+        if age < 18:
+            age_groups["<18"] += 1
+        elif age <= 40:
+            age_groups["18-40"] += 1
         elif age <= 60:
-            groups["36-60"] += 1
+            age_groups["40-60"] += 1
         else:
-            groups["60+"] += 1
+            age_groups["60+"] += 1
+    return jsonify(age_groups)
 
-    return jsonify(groups)
-
-# Top doctors by number of patients
 @analytics_bp.route("/patients-checkin-status")
 def patients_checkin_status():
-    checkins = db.session.query(func.count(Patientin.id)).scalar() or 0
-    checkouts = db.session.query(func.count(Patientout.id)).scalar() or 0
+    checked_in = db.session.query(func.count(Patientin.id)).scalar() or 0
+    checked_out = db.session.query(func.count(Patientout.id)).scalar() or 0
+    return jsonify({"Checked In": checked_in, "Checked Out": checked_out})
 
+@analytics_bp.route("/workflow-overview")
+def workflow_overview():
+    # Workflow steps: Registration -> Check-in -> Prescription -> Drug Dispensing -> Check-out
+    total_patients = db.session.query(func.count(Patient.id)).scalar() or 0
+    checked_in = db.session.query(func.count(Patientin.id)).scalar() or 0
+    prescriptions = db.session.query(func.count(Prescription.id)).scalar() or 0
+    drugs_dispensed = db.session.query(func.count(DrugsHistory.id)).scalar() or 0
+    checked_out = db.session.query(func.count(Patientout.id)).scalar() or 0
+    
     return jsonify({
-        "Checked-in": int(checkins),
-        "Checked-out": int(checkouts)
+        "Registered": total_patients,
+        "Checked In": checked_in,
+        "Prescribed": prescriptions,
+        "Drugs Dispensed": drugs_dispensed,
+        "Checked Out": checked_out
     })

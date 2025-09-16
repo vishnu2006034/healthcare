@@ -1,11 +1,66 @@
 {% extends 'base.html' %}
 
-{% block title %}Hospital Analytics{% endblock %}
+{% block title %}Super Admin Dashboard{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <h1 class="text-center my-4">Hospital Analytics</h1>
+    <h1 class="text-center my-4">Super Admin Dashboard - Overall Workflow Analytics</h1>
     <div class="row">
+        <!-- Summary Cards -->
+        <div class="col-md-12 mb-4">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="totalPatients">0</h5>
+                            <p class="card-text">Total Patients</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="totalDoctors">0</h5>
+                            <p class="card-text">Total Doctors</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="totalDrugs">0</h5>
+                            <p class="card-text">Total Drugs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="checkedIn">0</h5>
+                            <p class="card-text">Currently Checked In</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="checkedOut">0</h5>
+                            <p class="card-text">Checked Out Today</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title" id="prescriptions">0</h5>
+                            <p class="card-text">Prescriptions (Last 30 Days)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
         <div class="col-md-6 mb-4">
             <div class="card" style="height: 400px;">
                 <div class="card-header">
@@ -56,6 +111,23 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card" style="height: 400px;">
+                <div class="card-header">
+                    <h5>Workflow Overview</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between mb-2">
+                        <button id="refreshWorkflow" class="btn btn-primary btn-sm">Refresh</button>
+                        <span id="workflowStatus" class="text-muted small"></span>
+                    </div>
+                    <div style="flex-grow: 1; position: relative;">
+                        <canvas id="workflowChart" style="height: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -74,6 +146,18 @@
       })
     }
 
+    // Load summary data
+    async function loadSummary(){
+      try{
+        const data = await loadJSON('/analytics/superadmin/workflow')
+        byId('totalPatients').textContent = data.total_patients
+        byId('totalDoctors').textContent = data.total_doctors
+        byId('totalDrugs').textContent = data.total_drugs
+        byId('checkedIn').textContent = data.checked_in
+        byId('checkedOut').textContent = data.checked_out
+        byId('prescriptions').textContent = data.prescriptions_last_month
+      }catch(e){ console.error('Error loading summary:', e) }
+    }
 
     // Fetchers
     async function loadJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() }
@@ -88,32 +172,46 @@
       }catch(e){ status(s, e.message, true) }
     }
     async function refreshAge(){
-  const s = byId('ageStatus'); status(s, 'Loading...')
-  try{
-    const data = await loadJSON('/analytics/patients-by-age-group')
-    const {labels, data:vals} = toLabelsData(data)
-    drawBarChart(byId('ageChart'), labels, vals, 'Patients by Age Group','rgba(239,68,68,0.7)')
-    status(s, `Updated ${new Date().toLocaleTimeString()}`)
-  }catch(e){ status(s, e.message, true) }
-}
-
-byId('refreshAge').addEventListener('click', refreshAge)
-refreshAge()
+      const s = byId('ageStatus'); status(s, 'Loading...')
+      try{
+        const data = await loadJSON('/analytics/patients-by-age-group')
+        const {labels, data:vals} = toLabelsData(data)
+        drawBarChart(byId('ageChart'), labels, vals, 'Patients by Age Group','rgba(239,68,68,0.7)')
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
+      }catch(e){ status(s, e.message, true) }
+    }
 
     async function refreshStatus(){
-  const s = byId('statusStatus'); status(s, 'Loading...')
-  try{
-    const data = await loadJSON('/analytics/patients-checkin-status')
-    const {labels, data:vals} = toLabelsData(data)
-    drawBarChart(byId('statusChart'), labels, vals, 'Patients Status','rgba(239,68,68,0.7)')
-    status(s, `Updated ${new Date().toLocaleTimeString()}`)
-  }catch(e){ status(s, e.message, true) }
-}
+      const s = byId('statusStatus'); status(s, 'Loading...')
+      try{
+        const data = await loadJSON('/analytics/patients-checkin-status')
+        const {labels, data:vals} = toLabelsData(data)
+        drawBarChart(byId('statusChart'), labels, vals, 'Patients Status','rgba(239,68,68,0.7)')
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
+      }catch(e){ status(s, e.message, true) }
+    }
 
-byId('refreshStatus').addEventListener('click', refreshStatus)
-refreshStatus()
+    async function refreshWorkflow(){
+      const s = byId('workflowStatus'); status(s, 'Loading...')
+      try{
+        const data = await loadJSON('/analytics/workflow-overview')
+        const {labels, data:vals} = toLabelsData(data)
+        drawBarChart(byId('workflowChart'), labels, vals, 'Workflow Steps','rgba(34,197,94,0.7)')
+        status(s, `Updated ${new Date().toLocaleTimeString()}`)
+      }catch(e){ status(s, e.message, true) }
+    }
 
+    // Event listeners
     byId('refreshPatients').addEventListener('click', refreshPatients)
-    refreshPatients();
+    byId('refreshAge').addEventListener('click', refreshAge)
+    byId('refreshStatus').addEventListener('click', refreshStatus)
+    byId('refreshWorkflow').addEventListener('click', refreshWorkflow)
+
+    // Initial load
+    loadSummary()
+    refreshPatients()
+    refreshAge()
+    refreshStatus()
+    refreshWorkflow()
   </script>
 {% endblock %}

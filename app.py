@@ -118,17 +118,15 @@ def index():
 @app.route('/adminl', methods=['GET', 'POST'])
 def adminl():
     if request.method == 'POST':
-        code = "12345"
-        hpassword = Admin(password=code)
-        db.session.add(hpassword)
-        db.session.commit()
         password = request.form.get('password')
-        passes = Admin.query.filter_by(password=code).first()
-        if password == passes.password:
-            flash('successfully login', 'success')
-            return redirect('adminp')
+        if password == "11111":
+            flash('Super Admin login successful', 'success')
+            return redirect(url_for('analytics.superadmin_dashboard'))
+        elif password == "12345":
+            flash('Admin login successful', 'success')
+            return redirect(url_for('adminp'))
         else:
-            flash('check the password ', 'error')
+            flash('Invalid password', 'error')
             return redirect(url_for('index'))
     return render_template('adminlogin.html')
 
