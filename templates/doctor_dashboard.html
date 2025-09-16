@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Doctor Analytics Dashboard</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Patient Flow Over Time</h4>
+            <canvas id="patientFlowChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h4>Patient Visit Outcomes</h4>
+            <canvas id="patientVisitOutcomesChart"></canvas>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Patient Demographics Distribution</h4>
+            <canvas id="patientDemographicsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function fetchData(url) {
+        const response = await fetch(url);
+        return response.json();
+    }
+
+    async function renderCharts() {
+        // Patient Flow Over Time
+        const flowData = await fetchData('{{ url_for("analyticsdoctor.patient_flow_over_time") }}');
+        const flowLabels = Object.keys(flowData);
+        const flowCounts = Object.values(flowData);
+
+        const ctxFlow = document.getElementById('patientFlowChart').getContext('2d');
+        new Chart(ctxFlow, {
+            type: 'line',
+            data: {
+                labels: flowLabels,
+                datasets: [{
+                    label: 'Patients Seen',
+                    data: flowCounts,
+                    fill: true,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Number of Patients' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Patient Visit Outcomes
+        const outcomesData = await fetchData('{{ url_for("analyticsdoctor.patient_visit_outcomes") }}');
+        const ctxOutcomes = document.getElementById('patientVisitOutcomesChart').getContext('2d');
+        new Chart(ctxOutcomes, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(outcomesData),
+                datasets: [{
+                    label: 'Number of Patients',
+                    data: Object.values(outcomesData),
+                    backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)']
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Patient Demographics Distribution
+        const demographicsData = await fetchData('{{ url_for("analyticsdoctor.patient_demographics") }}');
+        const ageGroups = demographicsData.age_groups;
+        const genderData = demographicsData.gender;
+
+        const ctxDemographics = document.getElementById('patientDemographicsChart').getContext('2d');
+        new Chart(ctxDemographics, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(ageGroups),
+                datasets: [{
+                    label: 'Age Groups',
+                    data: Object.values(ageGroups),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Patient Age Groups' }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCharts);
+</script>
+{% endblock %}

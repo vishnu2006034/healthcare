@@ -9,6 +9,7 @@ import json
 from models import db,Admin,Patient,Medical,Drugs,Doctor ,Patientin,Patientout,Prescription,DrugsHistory # ✅ import db from models
 from analytics import analytics_bp
 from analyticsdrug import analyticsdrug_bp
+from analyticsdoctor import analyticsdoctor_bp
 # from sqlalchemy import func
 # from analytics import analytics_bp
 # app.register_blueprint(analytics_bp)
@@ -34,6 +35,7 @@ login.login_view = 'doclogin'
 db.init_app(app)
 app.register_blueprint(analytics_bp, url_prefix="/analytics")
 app.register_blueprint(analyticsdrug_bp,url_prefix="/analyticsdrug")
+app.register_blueprint(analyticsdoctor_bp, url_prefix="/analyticsdoctor")
 
 @login.user_loader
 def load_user(user_id):
@@ -463,10 +465,28 @@ from flask_login import login_required, current_user
 def docprofile():
     return render_template('docprofile.html', doctor=current_user)
 
+@app.route('/doctordashboard')
+@login_required
+def doctordashboard():
+    return render_template('doctor_dashboard.html')
+
 @app.route("/logout")
 def logout():
     logout_user()  # log out user
     return redirect(url_for('index'))
+
+@app.route('/discharge/<int:patient_id>')
+@login_required
+def discharge_patient(patient_id):
+    # Remove patient from Patientin table (doctor's view)
+    patientin_record = Patientin.query.filter_by(patient_id=patient_id).first()
+    if patientin_record:
+        db.session.delete(patientin_record)
+        db.session.commit()
+        flash('Patient discharged successfully.', 'success')
+    else:
+        flash('Patient not found or already discharged.', 'error')
+    return redirect(url_for('docpro'))
     
 
 # Register the analytics blueprint

@@ -3,11 +3,14 @@
 {% block title %}Hospital Drug Analytics{% endblock %}
 
 {% block content %}
-<div class="d-flex">
-    <nav class="sidebar text-white p-3 vh-100" style="background-color: #007b7f;">
+<div class="d-flex min-vh-100">
+    <nav class="sidebar text-white p-3 min-vh-100" style="background-color: #007b7f;">
         <h5 class="mb-4">Menu</h5>
         <ul class="nav flex-column">
             <li class="nav-item mb-2"><a href="{{ url_for('medp') }}" class="nav-link text-white"><i class="fas fa-pills me-2"></i> Prescriptions</a></li>
+            <li class="nav-item mb-2"><a href="{{ url_for('analyticsdrug.analytics_drugdashboard') }}" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Dashboard</a></li>
+            <li class="nav-item mb-2"><a href="{{ url_for('updatedrugs') }}" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Update Drugs</a></li>
+            <li class="nav-item mb-2"><a href="{{ url_for('drughistory') }}" class="nav-link text-white"><i class="fas fa-history me-2"></i> Drug History</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('logout') }}" class="nav-link text-white"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
         </ul>
     </nav>
@@ -15,9 +18,9 @@
         <h1 class="mb-4">Hospital Drug Analytics</h1>
         <div class="wrap">
     <div class="grid">
-      <!-- Drugs per Department -->
+      <!-- Top Prescribed Drugs -->
       <section class="card">
-        <h2>Drugs per Department</h2>
+        <h2>Top Prescribed Drugs</h2>
         <div class="toolbar">
           <button id="refreshDrugsDept">Refresh</button>
           <span id="drugsDeptStatus" class="status"></span>
@@ -26,15 +29,15 @@
         <table class="table" id="drugsDeptTable"></table>
       </section>
 
-      <!-- Drugs Stock Value -->
+      <!-- Department-Wise Drug Distribution -->
       <section class="card">
-        <h2>Drugs Stock Value</h2>
+        <h2>Department-Wise Drug Distribution</h2>
         <div class="toolbar">
-          <button id="refreshDrugsValue">Refresh</button>
-          <span id="drugsValueStatus" class="status"></span>
+          <button id="refreshDeptDistribution">Refresh</button>
+          <span id="deptDistributionStatus" class="status"></span>
         </div>
-        <canvas id="drugsValueChart"></canvas>
-        <table class="table" id="drugsValueTable"></table>
+        <canvas id="deptDistributionChart"></canvas>
+        <table class="table" id="deptDistributionTable"></table>
       </section>
 
       <!-- Low Stock Drugs -->
@@ -76,9 +79,13 @@
     function byId(id){return document.getElementById(id)}
     function status(el,msg,isError=false){el.textContent=msg;el.classList.toggle('error',isError)}
     function toLabelsData(obj){const labels=Object.keys(obj||{});const data=labels.map(k=>obj[k]);return {labels,data}}
-    function drawBarChart(ctx,labels,data,label,color='rgba(125,211,252,0.7)'){
+    function drawBarChart(ctx,labels,data,label,color='rgba(125,211,252,0.7)', indexAxis='x'){
       if(ctx.__chart) ctx.__chart.destroy()
-      ctx.__chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:color}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}})
+      ctx.__chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:color}]},options:{responsive:true,scales:{y:{beginAtZero:true}}, indexAxis}})
+    }
+    function drawPieChart(ctx,labels,data,label){
+      if(ctx.__chart) ctx.__chart.destroy()
+      ctx.__chart=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{label,data,backgroundColor:['rgba(255,99,132,0.7)','rgba(54,162,235,0.7)','rgba(255,205,86,0.7)','rgba(75,192,192,0.7)','rgba(153,102,255,0.7)','rgba(255,159,64,0.7)']}]},options:{responsive:true}})
     }
     function renderTable(el,obj,headers){
       const labels=Object.keys(obj||{})
@@ -91,24 +98,24 @@
       const s=byId('drugsDeptStatus')
       status(s,'Loading...')
       try{
-        const r=await fetch('/analyticsdrug/drugs-per-department')
+        const r=await fetch('/analyticsdrug/top-prescribed-drugs')
         const d=await r.json()
         const {labels,data}=toLabelsData(d)
-        drawBarChart(byId('drugsDeptChart'),labels,data,'Drugs per Dept')
-        renderTable(byId('drugsDeptTable'),d,['Department','Drugs'])
+        drawBarChart(byId('drugsDeptChart'),labels,data,'Top Prescribed Drugs', 'rgba(125,211,252,0.7)', 'y')
+        renderTable(byId('drugsDeptTable'),d,['Drug','Count'])
         status(s,'Updated')
       }catch(e){status(s,'Error',true)}
     }
 
-    async function fetchDrugsValue(){
-      const s=byId('drugsValueStatus')
+    async function fetchDeptDistribution(){
+      const s=byId('deptDistributionStatus')
       status(s,'Loading...')
       try{
-        const r=await fetch('/analyticsdrug/drugs-stock-value')
+        const r=await fetch('/analyticsdrug/department-drug-distribution')
         const d=await r.json()
         const {labels,data}=toLabelsData(d)
-        drawBarChart(byId('drugsValueChart'),labels,data,'Stock Value')
-        renderTable(byId('drugsValueTable'),d,['Department','Stock Value'])
+        drawPieChart(byId('deptDistributionChart'),labels,data,'Prescription Count')
+        renderTable(byId('deptDistributionTable'),d,['Department','Prescription Count'])
         status(s,'Updated')
       }catch(e){status(s,'Error',true)}
     }
@@ -130,12 +137,12 @@
 
     // Bind buttons
     byId('refreshDrugsDept').onclick=fetchDrugsDept
-    byId('refreshDrugsValue').onclick=fetchDrugsValue
+    byId('refreshDeptDistribution').onclick=fetchDeptDistribution
     byId('refreshDrugsLow').onclick=fetchDrugsLow
 
     // Auto load on startup
     fetchDrugsDept()
-    fetchDrugsValue()
+    fetchDeptDistribution()
     fetchDrugsLow()
 </script>
 {% endblock %}

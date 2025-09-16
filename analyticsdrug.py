@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify
 from sqlalchemy import func
-from models import db, Patient,Drugs,Doctor,Patientin,Patientout
+from models import db, Patient,Drugs,Doctor,Patientin,Patientout,DrugsHistory
 
 
 analyticsdrug_bp = Blueprint("analyticsdrug", __name__)
@@ -9,23 +9,27 @@ analyticsdrug_bp = Blueprint("analyticsdrug", __name__)
 def analytics_drugdashboard():
     return render_template("druganalytics.html")
 
-@analyticsdrug_bp.route("/drugs-per-department")
-def drugs_per_department():
+@analyticsdrug_bp.route("/top-prescribed-drugs")
+def top_prescribed_drugs():
     rows = (
-        db.session.query(Drugs.department, func.sum(Drugs.quantity))
-        .group_by(Drugs.department)
+        db.session.query(Drugs.name, func.count(DrugsHistory.id).label('count'))
+        .join(DrugsHistory, DrugsHistory.drugs_id == Drugs.id)
+        .group_by(Drugs.id)
+        .order_by(func.count(DrugsHistory.id).desc())
+        .limit(10)
         .all()
     )
-    return jsonify({dept or "Unknown": int(qty) for dept, qty in rows})
+    return jsonify({name: int(count) for name, count in rows})
 
-@analyticsdrug_bp.route("/drugs-stock-value")
-def drugs_stock_value():
+@analyticsdrug_bp.route("/department-drug-distribution")
+def department_drug_distribution():
     rows = (
-        db.session.query(Drugs.department, func.sum(Drugs.price * Drugs.quantity))
+        db.session.query(Drugs.department, func.count(DrugsHistory.id).label('count'))
+        .join(DrugsHistory, DrugsHistory.drugs_id == Drugs.id)
         .group_by(Drugs.department)
         .all()
     )
-    return jsonify({dept or "Unknown": float(value) for dept, value in rows})
+    return jsonify({dept or "Unknown": int(count) for dept, count in rows})
 
 @analyticsdrug_bp.route("/drugs-low-stock")
 def drugs_low_stock():

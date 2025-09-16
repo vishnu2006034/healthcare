@@ -15,6 +15,11 @@
                     </a>
                 </li>
                 <li class="nav-item mb-2">
+                    <a href="{{ url_for('doctordashboard') }}" class="nav-link">
+                        <i class="fas fa-chart-bar me-2"></i> Analytics Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
                     <a href="{{ url_for('docprofile') }}" class="nav-link">
                         <i class="fas fa-user me-2"></i> My Profile
                     </a>
@@ -42,7 +47,7 @@
                             <th>Age</th>
                             <th>Gender</th>
                             <th>Check-in Time</th>
-                            <th>Notes</th>
+                            <th>Action</th>
                             <th>Prescription</th>
                         </tr>
                     </thead>
@@ -54,7 +59,7 @@
                             <td>{{ patient.age }}</td>
                             <td>{{ patient.gender }}</td>
                             <td>{{ patientin.check_in_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                            <td>{{ patientin.notes }}</td>
+                            <td><a href="{{ url_for('discharge_patient', patient_id=patient.id) }}" class="btn btn-danger btn-sm">Discharge</a></td>
                             <td>
                                 <form action="{{ url_for('add_prescription') }}" method="POST">
                                     <input type="hidden" name="patient_id" value="{{ patient.id }}">
