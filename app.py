@@ -153,11 +153,9 @@ def patreg():
         flash("check for the account already exists")
     return render_template("patreg.html")
 
-@app.route('/docreg', methods=["GET", "POST"])
-def docreg():
-    if current_user.is_authenticated:  # if the employee password is correct open the employee profile
-        return redirect(url_for('docpro'))
-    if request.method == "POST":  # to get information for employee
+@app.route('/admindocreg', methods=["GET", "POST"])
+def admindocreg():
+    if request.method == "POST":
         name = request.form.get('name')
         email = request.form.get('email')
         department = request.form.get('dep')
@@ -169,7 +167,7 @@ def docreg():
         if picture and picture.filename:
             upload_folder = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
             os.makedirs(upload_folder, exist_ok=True)
-            filepath = os.path.join(upload_folder, picture.filename)  # for uploading the file
+            filepath = os.path.join(upload_folder, picture.filename)
             picture.save(filepath)
             picture_path = 'profile_photo/' + picture.filename
         else:
@@ -177,11 +175,14 @@ def docreg():
         newdoc = Doctor(name=name, email=email, department=department, phone=phone, age=age, gender=gender, password=password, picture=picture_path)
         db.session.add(newdoc)
         db.session.commit()
-        flash("account is successfully created", "success")
-        return redirect(url_for('doclogin')) # after the registraion returns to login page
-    else:
-        flash("check for the account already exists")
-    return render_template("docreg.html")  # it is the registration html
+        flash("Doctor account created successfully", "success")
+        return redirect(url_for('adminp'))
+    return render_template("admindocreg.html")
+
+@app.route('/docreg', methods=["GET", "POST"])
+def docreg():
+    # Disable or redirect doctor self-registration to admin registration
+    return redirect(url_for('admindocreg'))
     
 @app.route('/doclogin', methods=["GET", "POST"])
 def doclogin():

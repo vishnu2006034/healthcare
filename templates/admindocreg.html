@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Registration{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Doctor Registration</h1>
+    <form action="{{ url_for('admindocreg') }}" method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 600px;">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" id="name" name="name" required class="form-control" aria-label="Name">
+        </div>
+        <div class="mb-3">
+            <label for="age" class="form-label">Age:</label>
+            <input type="number" id="age" name="age" required class="form-control" aria-label="Age">
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender:</label>
+            <select id="gender" name="gender" required class="form-select" aria-label="Gender">
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="department" class="form-label">Department:</label>
+            <select id="department" name="dep" required class="form-select" aria-label="Department">
+                <option value="">Select Department</option>
+                <option value="dental">Dental</option>
+                <option value="ENT">ENT</option>
+                <option value="Eye">Eye</option>
+                <option value="general">General</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone no:</label>
+            <input type="tel" id="phone" name="phone" maxlength="10" pattern="\d{10}" inputmode="numeric" class="form-control" aria-label="Phone">
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" required class="form-control" aria-label="Email">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input type="password" id="password" name="password" required class="form-control" aria-label="Password">
+        </div>
+        <div class="mb-3">
+            <label for="photo" class="form-label">Photo:</label>
+            <input type="file" id="photo" name="picture" accept="image/*" required class="form-control" aria-label="Photo">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+</div>
+{% endblock %}
