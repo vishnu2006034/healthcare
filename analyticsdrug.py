@@ -30,8 +30,9 @@ def drugs_stock_value():
 @analyticsdrug_bp.route("/drugs-low-stock")
 def drugs_low_stock():
     rows = (
-        db.session.query(Drugs.id, Drugs.name, Drugs.department, Drugs.quantity, Drugs.update_quantity)
-        .filter(Drugs.quantity <= Drugs.update_quantity)  # flag when below threshold
+        db.session.query(Drugs.id, Drugs.name, Drugs.department, Drugs.quantity)
+        .order_by(Drugs.quantity.asc())
+        .limit(5)
         .all()
     )
 
@@ -41,7 +42,7 @@ def drugs_low_stock():
             "name": name,
             "department": dept,
             "quantity": int(qty),
-            "threshold": int(update_qty)
+            "threshold": 10
         }
-        for drug_id, name, dept, qty, update_qty in rows
+        for drug_id, name, dept, qty in rows
     ])

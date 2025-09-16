@@ -56,6 +56,7 @@ class Drugs(db.Model):
     department = db.Column(db.String(100), nullable = False)
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=True)
+    update_quantity = db.Column(db.Integer, nullable=True)
 
 class Prescription(db.Model):
     id = db.Column(db.Integer, primary_key=True)

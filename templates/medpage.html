@@ -8,7 +8,7 @@
         <h5 class="mb-4">Menu</h5>
         <ul class="nav flex-column">
             <li class="nav-item mb-2"><a href="{{ url_for('medp') }}" class="nav-link text-white"><i class="fas fa-pills me-2"></i> Prescriptions</a></li>
-            <!-- <li class="nav-item mb-2"><a href="{{ url_for('selectdrug') }}" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Select Drugs</a></li> -->
+            <li class="nav-item mb-2"><a href="{{ url_for('analyticsdrug.analytics_drugdashboard') }}" class="nav-link text-white"><i class="fas fa-plus me-2"></i> Dashboard</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('updatedrugs') }}" class="nav-link text-white"><i class="fas fa-edit me-2"></i> Update Drugs</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('drughistory') }}" class="nav-link text-white"><i class="fas fa-history me-2"></i> Drug History</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('logout') }}" class="nav-link text-white"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>

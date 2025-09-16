@@ -7,8 +7,7 @@
     <nav class="sidebar text-white p-3 vh-100" style="background-color: #007b7f;">
         <h5 class="mb-4">Menu</h5>
         <ul class="nav flex-column">
-            <li class="nav-item mb-2"><a href="{{ url_for('analytics.analytics_dashboard') }}" class="nav-link text-white"><i class="fas fa-chart-line me-2"></i> Analytics</a></li>
-            <li class="nav-item mb-2"><a href="{{ url_for('druganalytics') }}" class="nav-link text-white"><i class="fas fa-pills me-2"></i> Drug Analytics</a></li>
+            <li class="nav-item mb-2"><a href="{{ url_for('medp') }}" class="nav-link text-white"><i class="fas fa-pills me-2"></i> Prescriptions</a></li>
             <li class="nav-item mb-2"><a href="{{ url_for('logout') }}" class="nav-link text-white"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
         </ul>
     </nav>
@@ -40,11 +39,12 @@
 
       <!-- Low Stock Drugs -->
       <section class="card">
-        <h2>Low Stock Drugs</h2>
+        <h2>Top 5 Low Stock Drugs</h2>
         <div class="toolbar">
           <button id="refreshDrugsLow">Refresh</button>
           <span id="drugsLowStatus" class="status"></span>
         </div>
+        <canvas id="drugsLowChart"></canvas>
         <table class="table" id="drugsLowTable"></table>
       </section>
     </div>
@@ -91,7 +91,7 @@
       const s=byId('drugsDeptStatus')
       status(s,'Loading...')
       try{
-        const r=await fetch('/analytics/drugs-per-department')
+        const r=await fetch('/analyticsdrug/drugs-per-department')
         const d=await r.json()
         const {labels,data}=toLabelsData(d)
         drawBarChart(byId('drugsDeptChart'),labels,data,'Drugs per Dept')
@@ -104,7 +104,7 @@
       const s=byId('drugsValueStatus')
       status(s,'Loading...')
       try{
-        const r=await fetch('/analytics/drugs-stock-value')
+        const r=await fetch('/analyticsdrug/drugs-stock-value')
         const d=await r.json()
         const {labels,data}=toLabelsData(d)
         drawBarChart(byId('drugsValueChart'),labels,data,'Stock Value')
@@ -117,10 +117,13 @@
       const s=byId('drugsLowStatus')
       status(s,'Loading...')
       try{
-        const r=await fetch('/analytics/low-stock-drugs')
+        const r=await fetch('/analyticsdrug/drugs-low-stock')
         const d=await r.json()
-        const rows=d.map(drug=>`<tr><td>${drug.name}</td><td>${drug.department}</td><td>${drug.quantity}</td></tr>`).join('')
-        byId('drugsLowTable').innerHTML=`<thead><tr><th>Name</th><th>Department</th><th>Quantity</th></tr></thead><tbody>${rows}</tbody>`
+        const labels = d.map(drug => drug.name)
+        const data = d.map(drug => drug.quantity)
+        drawBarChart(byId('drugsLowChart'), labels, data, 'Top 5 Low Stock Drugs')
+        const rows = d.map(drug => `<tr><td>${drug.name}</td><td>${drug.department}</td><td>${drug.quantity}</td></tr>`).join('')
+        byId('drugsLowTable').innerHTML = `<thead><tr><th>Name</th><th>Department</th><th>Quantity</th></tr></thead><tbody>${rows}</tbody>`
         status(s,'Updated')
       }catch(e){status(s,'Error',true)}
     }
