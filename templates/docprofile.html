@@ -19,8 +19,8 @@
             <p><strong>Phone:</strong> {{ doctor.phone }}</p>
             <p><strong>Age:</strong> {{ doctor.age }}</p>
             <p><strong>Gender:</strong> {{ doctor.gender }}</p>
-            <p><strong>Bio:</strong> This is a placeholder bio. You can update your profile to add more details.</p>
-            <p><strong>Address:</strong> Not provided</p>
+            <p><strong>Bio:</strong> {{doctor.bio}}</p>
+            <p><strong>Address:</strong> {{doctor.address}}</p>
         </div>
         <div class="card-footer text-center">
             <a href="{{ url_for('docpro') }}" class="btn btn-primary">Main Page</a>
